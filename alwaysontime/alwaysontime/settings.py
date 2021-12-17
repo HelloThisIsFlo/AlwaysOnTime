@@ -34,6 +34,14 @@ ALLOWED_HOSTS = [
 
 CSRF_TRUSTED_ORIGINS = ['https://alwaysontime.floriankempenich.com']
 
+# Also set in NginX:
+#
+#     proxy_set_header   X-Forwarded-Proto  $scheme;
+#
+# To understand why this is important and what nginx config to use, see:
+# https://docs.djangoproject.com/en/4.0/ref/settings/#secure-proxy-ssl-header
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
 
 # Application definition
 
