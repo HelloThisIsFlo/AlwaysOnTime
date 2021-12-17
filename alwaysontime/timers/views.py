@@ -52,7 +52,7 @@ def index(request):
         return redirect('/accounts/social/connections/')
 
     return render(request, 'index.html', {
-        'events': list(Event.objects.all())
+        'events': list(Event.objects.all().order_by('start'))
     })
 
 

@@ -14,17 +14,66 @@
 <h2>Events</h2>
 <ul>
     {% for e in events %}
-        <li><b>{{ e.summary }}</b> - {{ e.start }}</li>
+        <li>
+            <div class="timer">
+                <div class="summary">{{ e.summary }}</div>
+                <div class="time" data-start="{{ e.start|date:"r" }}"></div>
+            </div>
+        </li>
     {% endfor %}
 </ul>
 
 <hr>
 <ul>
     <li><a href="/sandbox">Run Sandbox</a></li>
+    <li><a href="/refresh_events_in_db">Refresh events in DB</a></li>
     <li><a href="/revoke">Revoke token and Logout</a></li>
     <li><a href="/accounts/logout">Logout</a></li>
     <li><a href="/accounts/login/">Login</a></li>
     <li><a href="/admin/">Admin</a></li>
 </ul>
+
+<div class="debug"></div>
+<script>
+    const timerTimeDivs = document.querySelectorAll('.timer .time')
+
+    const formatTimer = timer => {
+        const floor = Math.floor
+        const days = floor(timer / 1000 / 60 / 60 / 24)
+        const hours = floor((timer / 1000 / 60 / 60) - days * 24)
+        const minutes = floor((timer / 1000 / 60) - days * 24 * 60 - hours * 60)
+        const seconds = floor((timer / 1000) - days * 24 * 60 * 60 - hours * 60 * 60 - minutes * 60)
+        return `${days}d ${hours}h ${minutes}m ${seconds}s`
+    }
+    const refreshTimers = () => {
+        const now = Date.now()
+
+        for (const timeDiv of timerTimeDivs) {
+            const eventStart = Date.parse(timeDiv.dataset.start);
+            const timer = eventStart - now
+            timeDiv.textContent = formatTimer(timer)
+        }
+
+        setTimeout(refreshTimers, 1000)
+    }
+    refreshTimers()
+
+
+    /*
+    * DEBUG - Reload every 3 sec
+    */
+    const debugDiv = document.querySelector('.debug')
+    setTimeout(location.reload, 3000)
+    let countDown = 3;
+    const debug = () => {
+        if (!countDown) {
+            location.reload();
+        }
+        debugDiv.textContent = `Reloading page in ${countDown}s`
+        countDown--
+        setTimeout(debug, 1000)
+    }
+    // debug()
+</script>
 </body>
 </html>
