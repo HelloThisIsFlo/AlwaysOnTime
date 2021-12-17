@@ -43,6 +43,9 @@
         .due {
             color: #fa2c2c;
         }
+        .due-soon {
+            color: #fa962c;
+        }
 
         .main-event {
             margin-bottom: 130px;
@@ -135,10 +138,13 @@
 
         const isDue = !hours && !minutes
         const lessThan1hLeft = !hours
+        const dueSoon = lessThan1hLeft && minutes < 20
         return isDue ?
             `<span class="due">Due</span>` :
             lessThan1hLeft ?
-                `${minutes}m` :
+                dueSoon ?
+                    `<span class="due-soon">${minutes}m</span>` :
+                    `${minutes}m` :
                 `${hours}h ${minutes}m`
     }
     const refreshTimers = () => {
