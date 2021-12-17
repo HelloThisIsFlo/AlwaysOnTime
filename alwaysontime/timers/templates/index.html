@@ -76,18 +76,18 @@
     const timerTimeDivs = document.querySelectorAll('.timer .time')
 
     const formatTimer = timer => {
-        const floor = Math.floor
-        const days = floor(timer / 1000 / 60 / 60 / 24)
-        const hours = floor((timer / 1000 / 60 / 60) - days * 24)
-        const minutes = floor((timer / 1000 / 60) - days * 24 * 60 - hours * 60)
-        const seconds = floor((timer / 1000) - days * 24 * 60 * 60 - hours * 60 * 60 - minutes * 60)
+        const floor_pos = n => n <= 0 ? 0 : Math.floor(n)
+        const days = floor_pos(timer / 1000 / 60 / 60 / 24)
+        const hours = floor_pos((timer / 1000 / 60 / 60) - days * 24)
+        const minutes = floor_pos((timer / 1000 / 60) - days * 24 * 60 - hours * 60)
+        const seconds = floor_pos((timer / 1000) - days * 24 * 60 * 60 - hours * 60 * 60 - minutes * 60)
 
         if (DEBUG_MODE) {
             return `${days}d ${hours}h ${minutes}m ${seconds}s`
         }
         return hours ?
-            `${hours}h ${minutes}m ${seconds}s` :
-            `${minutes}m ${seconds}s`
+            `${hours}h ${minutes}m` :
+            `${minutes}m`
     }
     const refreshTimers = () => {
         const now = Date.now()

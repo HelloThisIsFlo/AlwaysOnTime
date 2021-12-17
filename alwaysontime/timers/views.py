@@ -7,6 +7,7 @@ from allauth.socialaccount.models import SocialToken
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
+from django.utils import timezone
 from django.shortcuts import render, redirect
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
@@ -51,8 +52,17 @@ def index(request):
     if not SocialToken.objects.filter(account__user=request.user):
         return redirect('/accounts/social/connections/')
 
+    now = timezone.now()
+    now_minus_30_min = now - datetime.timedelta(minutes=30)
+    now_plus_5_hours = now + datetime.timedelta(hours=13)
+    events = Event.objects.filter(
+            start__gte=now_minus_30_min,
+            start__lt=now_plus_5_hours
+    ).order_by('start')
+
+    # TODO: Separate 'main_event' (soonest to happen) from other_events'
     return render(request, 'index.html', {
-        'events': list(Event.objects.all().order_by('start'))
+        'events': events
     })
 
 
