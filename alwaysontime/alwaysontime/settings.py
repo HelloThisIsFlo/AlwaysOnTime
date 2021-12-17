@@ -37,6 +37,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    'timers'
 ]
 
 MIDDLEWARE = [
@@ -155,3 +157,5 @@ INSTALLED_APPS = INSTALLED_APPS + [
 ]
 
 ACCOUNT_EMAIL_VERIFICATION = 'none'
+
+LOGIN_URL = '/accounts/google/login/'
