@@ -25,5 +25,5 @@ class SandboxTestCase(TestCase):
     def test_truncation(self):
         text = 'This is some very long text, like veeeeeery long long text'
         truncated = Truncator(text).chars(20)
-        print(truncated)
-        self.assertEqual(len(truncated), 21)
+        self.assertEqual(len(truncated), 20)
+        self.assertEqual(truncated, 'This is some very l…')
