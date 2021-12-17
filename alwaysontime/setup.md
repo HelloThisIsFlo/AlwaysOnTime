@@ -1,6 +1,39 @@
-# Setup All Auth
+# Setup
 
+1. Create DB directory
+  - See below
+2. `docker-compose run alwaysontime pipenv run python manage.py migrate`
+3. `docker-compose run alwaysontime pipenv run python manage.py createsuperuser`
+4. Setup All-Auth
+  - See below
 
+## Database
+
+Using SQLite 3
+
+### Create DB Directory & symlink
+
+- `sudo mkdir -p /var/lib/com.floriankempenich/alwaysontime/database`
+- `sudo chown -R floriankempenich:staff /var/lib/com.floriankempenich`
+- `ln -s /var/lib/com.floriankempenich/alwaysontime/database ./alwaysontime/database`
+
+### Explanation
+
+- DB Stored at `/var/lib/com.floriankempenich/alwaysontime/database/db.sqlite3`
+- App expects it at `./database/db.sqlite3`
+  - **Docker:** Mount as a volume => `$DB_DIR_HOST:/alwaysontime/database`
+    - `DB_DIR_HOST` is where the db can be found on the host
+      - Set locally in `.env` to `$HOME/.databases/alwaysontime`
+      - Set on pipeline in `.env` to `$HOME/.databases/alwaysontime`
+    - `alwaysontime` is the working directory in docker. It contains:
+      - Everything in the local `alwaysontime` folder
+      - `Pipfile` & `Pipfile.lock` from the root of the project
+  - **Locally:** Symlink (created above)
+
+## All-Auth
+
+- Download credentials
+  - https://console.cloud.google.com/apis/credentials?authuser=2&project=always-on-time-335408
 - In http://localhost:8100/admin/
   - In `Sites`
     - Make sure there is a Site

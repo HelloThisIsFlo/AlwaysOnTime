@@ -1,0 +1,13 @@
+version: "3.9"
+
+services:
+  alwaysontime:
+    build: .
+    command: pipenv run python manage.py runserver 0.0.0.0:8100
+    volumes:
+      - /var/lib/com.floriankempenich/alwaysontime/database:/alwaysontime/database
+    ports:
+      - "8100:8100"
+    environment:
+      - NOTHING_FOR_NOW=just_remembering_syntax
+    restart: always
