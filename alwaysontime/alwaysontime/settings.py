@@ -135,16 +135,25 @@ AUTHENTICATION_BACKENDS = [
 
 SITE_ID = 1
 
+GOOGLE_SCOPES = [
+    'profile',
+    'email',
+    'https://www.googleapis.com/auth/calendar.calendarlist.readonly', # See the list of Google Calendars that you’re subscribed to
+    'https://www.googleapis.com/auth/calendar.events.public.readonly', # See the events on public calendars
+    'https://www.googleapis.com/auth/calendar.settings.readonly', # View your Calendar settings
+    'https://www.googleapis.com/auth/calendar.freebusy', # View your availability in your calendars
+    'https://www.googleapis.com/auth/calendar.readonly', #See and download any calendar that you can access using your Google Calendar
+    'https://www.googleapis.com/auth/calendar.calendars.readonly', #See the title, description, default time zone and other properties of Google Calendars that you have access to
+    'https://www.googleapis.com/auth/calendar.events.owned.readonly', #See the events that you own on Google Calendars
+    'https://www.googleapis.com/auth/calendar.events.readonly', #View events on all of your calendars
+]
+
 SOCIALACCOUNT_PROVIDERS = {
     'google': {
-        'SCOPE': [
-            'profile',
-            'email',
-            'https://www.googleapis.com/auth/calendar.calendarlist.readonly', # See the list of Google Calendars that you’re subscribed to
-            'https://www.googleapis.com/auth/calendar.events.public.readonly', # See the events on public calendars
-            'https://www.googleapis.com/auth/calendar.settings.readonly', # View your Calendar settings
-            'https://www.googleapis.com/auth/calendar.freebusy' # View your availability in your calendars
-        ]
+        'SCOPE': GOOGLE_SCOPES,
+        'AUTH_PARAMS': {
+            'access_type': 'offline',
+        }
     }
 }
 
@@ -158,4 +167,4 @@ INSTALLED_APPS = INSTALLED_APPS + [
 
 ACCOUNT_EMAIL_VERIFICATION = 'none'
 
-LOGIN_URL = '/accounts/google/login/'
+LOGIN_URL = '/accounts/login/'
