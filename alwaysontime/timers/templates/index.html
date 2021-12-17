@@ -2,27 +2,64 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Sandbox</title>
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Always On Time</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css"
+          integrity="sha384-DyZ88mC6Up2uqS4h/KRgHuoeGwBcD4Ng9SiP4dIRy0EXTlnuz47vAwmeGwVChigm" crossorigin="anonymous">
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        .timers {
+            position: relative;
+        }
+        .timer {
+            margin: 30px;
+            width: auto;
+        }
+        @media (min-width: 500px) {
+            .timer {
+                margin: 30px;
+                width: 290px;
+            }
+        }
+
+
+        .container {
+            margin-top: 100px;
+        }
+
+        .columns:first-child {
+            margin-bottom: 130px;
+        }
+
+        html {
+            background-color: #fff9ee;
+        }
+    </style>
 </head>
 <body>
-<p>
-    Index: Logged in
-</p>
-<p>
-    {{ token }}
-</p>
-<h2>Events</h2>
-<ul>
+<div class="container timers">
     {% for e in events %}
-        <li>
-            <div class="timer">
-                <div class="summary">{{ e.summary }}</div>
-                <div class="time" data-start="{{ e.start|date:"r" }}"></div>
+        <div class="columns">
+            <div class="card timer">
+                <div class="card-content">
+                    <div class="media">
+                        <div class="media-content">
+                            <div class="summary">{{ e.summary }}</div>
+                        </div>
+                    </div>
+                    <div class="content">
+                        <p class="time is-centered is-size-2" data-start="{{ e.start|date:"r" }}"></p>
+                    </div>
+                </div>
             </div>
-        </li>
+        </div>
     {% endfor %}
-</ul>
-
+</div>
 <hr>
 <ul>
     <li><a href="/sandbox">Run Sandbox</a></li>
@@ -35,6 +72,7 @@
 
 <div class="debug"></div>
 <script>
+    const DEBUG_MODE = false;
     const timerTimeDivs = document.querySelectorAll('.timer .time')
 
     const formatTimer = timer => {
@@ -43,7 +81,13 @@
         const hours = floor((timer / 1000 / 60 / 60) - days * 24)
         const minutes = floor((timer / 1000 / 60) - days * 24 * 60 - hours * 60)
         const seconds = floor((timer / 1000) - days * 24 * 60 * 60 - hours * 60 * 60 - minutes * 60)
-        return `${days}d ${hours}h ${minutes}m ${seconds}s`
+
+        if (DEBUG_MODE) {
+            return `${days}d ${hours}h ${minutes}m ${seconds}s`
+        }
+        return hours ?
+            `${hours}h ${minutes}m ${seconds}s` :
+            `${minutes}m ${seconds}s`
     }
     const refreshTimers = () => {
         const now = Date.now()
@@ -60,11 +104,10 @@
 
 
     /*
-    * DEBUG - Reload every 3 sec
+    * DEBUG - Reload every 2 sec
     */
     const debugDiv = document.querySelector('.debug')
-    setTimeout(location.reload, 3000)
-    let countDown = 3;
+    let countDown = 2;
     const debug = () => {
         if (!countDown) {
             location.reload();
@@ -73,7 +116,7 @@
         countDown--
         setTimeout(debug, 1000)
     }
-    // debug()
+    if (DEBUG_MODE) debug()
 </script>
 </body>
 </html>
