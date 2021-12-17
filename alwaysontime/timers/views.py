@@ -3,8 +3,10 @@ from functools import wraps
 from math import floor
 
 import dateutil.parser
+import requests
 from allauth.socialaccount.models import SocialToken
 from alwaysontime.settings import GOOGLE_SCOPES
+from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
@@ -20,11 +22,15 @@ def build_authenticated_service(endpoint_func):
     @wraps(endpoint_func)
     def wrapped(request):
         social_token = SocialToken.objects.get(account__user=request.user)
-        creds = Credentials(social_token.token,
+        creds = Credentials(token=social_token.token,
                             refresh_token=social_token.token_secret,
+                            token_uri='https://oauth2.googleapis.com/token',
+                            client_id=social_token.app.client_id,
+                            client_secret=social_token.app.secret,
                             scopes=GOOGLE_SCOPES)
         if creds.expired:
             creds.refresh(Request())
+            print("Token refreshed!")
 
         try:
             service = build('calendar', 'v3', credentials=creds)
@@ -47,6 +53,16 @@ def index(request):
     return render(request, 'index.html', {
         'token': 'yoooooooo not token'
     })
+
+
+@login_required
+def revoke(request):
+    social_token = SocialToken.objects.get(account__user=request.user)
+    requests.post('https://oauth2.googleapis.com/revoke',
+                  params={'token': social_token.token},
+                  headers={'content-type': 'application/x-www-form-urlencoded'})
+    logout(request)
+    return redirect('index')
 
 
 @login_required
@@ -79,6 +95,7 @@ def sandbox(request, service):
         print(f'{end=}')
         print(f'{duration=}')
         print(f'formatted_duration={duration_h}h{duration_m}m')
+        print(event)
         print()
 
     return redirect('index')

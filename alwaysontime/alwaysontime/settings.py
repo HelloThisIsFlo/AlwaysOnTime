@@ -136,8 +136,8 @@ AUTHENTICATION_BACKENDS = [
 SITE_ID = 1
 
 GOOGLE_SCOPES = [
-    'profile',
-    'email',
+    'https://www.googleapis.com/auth/userinfo.profile',
+    'https://www.googleapis.com/auth/userinfo.email',
     'https://www.googleapis.com/auth/calendar.calendarlist.readonly', # See the list of Google Calendars that you’re subscribed to
     'https://www.googleapis.com/auth/calendar.events.public.readonly', # See the events on public calendars
     'https://www.googleapis.com/auth/calendar.settings.readonly', # View your Calendar settings
