@@ -11,6 +11,14 @@
 <p>
     {{ token }}
 </p>
+<h2>Events</h2>
+<ul>
+    {% for e in events %}
+        <li><b>{{ e.summary }}</b> - {{ e.start }}</li>
+    {% endfor %}
+</ul>
+
+<hr>
 <ul>
     <li><a href="/sandbox">Run Sandbox</a></li>
     <li><a href="/revoke">Revoke token and Logout</a></li>

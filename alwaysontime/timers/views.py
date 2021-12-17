@@ -1,11 +1,9 @@
 import datetime
 from functools import wraps
-from math import floor
 
 import dateutil.parser
 import requests
 from allauth.socialaccount.models import SocialToken
-from alwaysontime.settings import GOOGLE_SCOPES
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
@@ -15,10 +13,13 @@ from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
+from alwaysontime.settings import GOOGLE_SCOPES
+from timers.models import Event
+
 ICE_CREAM_CALENDAR_ID = 'c_u2p0q67mc81rqekasjdtu83ng4@group.calendar.google.com'
 
 
-def build_authenticated_service(endpoint_func):
+def with_authenticated_calendar_service(endpoint_func):
     @wraps(endpoint_func)
     def wrapped(request):
         social_token = SocialToken.objects.get(account__user=request.user)
@@ -51,7 +52,7 @@ def index(request):
         return redirect('/accounts/social/connections/')
 
     return render(request, 'index.html', {
-        'token': 'yoooooooo not token'
+        'events': list(Event.objects.all())
     })
 
 
@@ -66,38 +67,45 @@ def revoke(request):
 
 
 @login_required
-@build_authenticated_service
-def sandbox(request, service):
-    # list_calendars(service)
+@with_authenticated_calendar_service
+def refresh_events_in_db(request, calendar_service):
+    def to_utc_str(dt):
+        return dt.isoformat() + 'Z'
 
-    now = datetime.datetime.utcnow().isoformat() + 'Z'
-    print('Getting the upcoming 10 events')
-    events_result = service \
+    def parse(dt):
+        return dateutil.parser.isoparse(dt)
+
+    now = datetime.datetime.utcnow()
+    now_plus_2_days = datetime.datetime.utcnow() + datetime.timedelta(days=2)
+    now_minus_1_hour = datetime.datetime.utcnow() + datetime.timedelta(hours=1)
+    events = calendar_service \
         .events() \
-        .list(calendarId=ICE_CREAM_CALENDAR_ID) \
-        .execute()
-    events_result = service.events().list(calendarId=ICE_CREAM_CALENDAR_ID,
-                                          timeMin=now,
-                                          maxResults=10,
-                                          singleEvents=True,
-                                          orderBy='startTime').execute()
-    events = events_result.get('items', [])
-    for event in events:
-        print()
-        summary = event['summary']
-        start = dateutil.parser.isoparse(event['start']['dateTime'])
-        end = dateutil.parser.isoparse(event['end']['dateTime'])
-        duration = end - start
-        duration_h = floor(duration.total_seconds() / 3600)
-        duration_m = floor((duration.total_seconds() / 60) - (duration_h * 60))
-        print(f'{summary=}')
-        print(f'{start=}')
-        print(f'{end=}')
-        print(f'{duration=}')
-        print(f'formatted_duration={duration_h}h{duration_m}m')
-        print(event)
-        print()
+        .list(calendarId=ICE_CREAM_CALENDAR_ID,
+              timeMin=to_utc_str(now),
+              timeMax=to_utc_str(now_plus_2_days),
+              maxResults=10,
+              singleEvents=True,
+              orderBy='startTime') \
+        .execute() \
+        .get('items', [])
 
+    for event in events:
+        google_id = event['id']
+        if not Event.objects.filter(google_id=google_id).exists():
+            event = Event(google_id=google_id,
+                          summary=(event['summary']),
+                          start=(parse(event['start']['dateTime'])),
+                          end=(parse(event['end']['dateTime'])))
+            event.save()
+
+    # TODO: Delete events that are 1h in the past see: 'now_minus_1_hour'
+    return redirect('index')
+
+
+@login_required
+@with_authenticated_calendar_service
+def sandbox(request, calendar_service):
+    # Do nothing
     return redirect('index')
 
 

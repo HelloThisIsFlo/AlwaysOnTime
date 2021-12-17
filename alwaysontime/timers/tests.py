@@ -2,6 +2,7 @@
 
 from dateutil.parser import isoparse
 from django.test import TestCase
+from django.utils.text import Truncator
 
 
 class SandboxTestCase(TestCase):
@@ -15,7 +16,14 @@ class SandboxTestCase(TestCase):
         concatlist = concatlist + [4, 5, 6]
         self.assertEqual(concatlist, [1, 2, 3, 4, 5, 6])
 
-    def test_list_concat(self):
+    def test_date_parsing(self):
         date_str = '2021-12-23T08:30:00Z'
         date = isoparse(date_str)
-        self.assertEqual('highlight', date)
+        self.assertEqual(date.day, 23)
+        self.assertEqual(date.tzname(), 'UTC')
+
+    def test_truncation(self):
+        text = 'This is some very long text, like veeeeeery long long text'
+        truncated = Truncator(text).chars(20)
+        print(truncated)
+        self.assertEqual(len(truncated), 21)
