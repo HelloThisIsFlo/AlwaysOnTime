@@ -1,5 +1,6 @@
 import datetime
 from datetime import timedelta
+from threading import Thread
 
 import dateutil.parser
 from allauth.socialaccount.models import SocialToken
@@ -14,6 +15,10 @@ from alwaysontime.settings import GOOGLE_SCOPES
 from timers.models import Event
 
 
+def refresh_all_events_in_shared_calendar_in_the_background():
+    Thread(target=refresh_all_events_in_shared_calendar, daemon=True).start()
+
+
 def refresh_all_events_in_shared_calendar():
     events = _load_events_from_calendar()
     update_events_in_db(events)
@@ -22,7 +27,6 @@ def refresh_all_events_in_shared_calendar():
 
 def update_events_in_db(events):
     for event in events:
-        print(event['summary'])
         event = Event(google_id=(event['id']),
                       summary=(event['summary']),
                       start=(_parse(event['start']['dateTime'])),
