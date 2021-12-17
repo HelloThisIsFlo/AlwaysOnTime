@@ -29,7 +29,8 @@ ALLOWED_HOSTS = [
     'floriankempenich.com',
     'alwaysontime.floriankempenich.com',
     '127.0.0.1',
-    'localhost'
+    'localhost',
+    '192.168.50.160'
 ]
 
 CSRF_TRUSTED_ORIGINS = ['https://alwaysontime.floriankempenich.com']

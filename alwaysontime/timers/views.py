@@ -60,15 +60,14 @@ def index(request):
         now - datetime.timedelta(minutes=settings.TIMERS_SHOW_X_MIN_PAST)
     now_plus_delta = \
         now + datetime.timedelta(minutes=settings.TIMERS_SHOW_X_MIN_FUTURE)
-    events = Event.objects.filter(
+    events = list(Event.objects.filter(
             start__gte=now_minus_delta,
             start__lt=now_plus_delta
-    ).order_by('start')
+    ).order_by('start'))
 
-    # TODO: Separate 'main_event' (soonest to happen) from other_events'
-    #       To make formatting easier
     return render(request, 'index.html', {
-        'events': events
+        'main_event': events[0] if events else None,
+        'other_events': events[1:] if len(events) >= 2 else []
     })
 
 
