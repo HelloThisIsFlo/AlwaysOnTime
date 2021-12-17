@@ -1,23 +1,22 @@
 import datetime
 from functools import wraps
 
-import dateutil.parser
 import requests
 from allauth.socialaccount.models import SocialToken
+from django.conf import settings
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
-from django.utils import timezone
 from django.shortcuts import render, redirect
+from django.utils import timezone
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
 from alwaysontime.settings import GOOGLE_SCOPES
+from timers.domain import calendar
 from timers.models import Event
-
-ICE_CREAM_CALENDAR_ID = 'c_u2p0q67mc81rqekasjdtu83ng4@group.calendar.google.com'
 
 
 def with_authenticated_calendar_service(endpoint_func):
@@ -53,14 +52,15 @@ def index(request):
         return redirect('/accounts/social/connections/')
 
     now = timezone.now()
-    now_minus_30_min = now - datetime.timedelta(minutes=30)
-    now_plus_5_hours = now + datetime.timedelta(hours=13)
+    now_minus_delta = now - datetime.timedelta(minutes=settings.TIMERS_SHOW_X_MIN_PAST)
+    now_plus_delta = now + datetime.timedelta(minutes=settings.TIMERS_SHOW_X_MIN_FUTURE)
     events = Event.objects.filter(
-            start__gte=now_minus_30_min,
-            start__lt=now_plus_5_hours
+            start__gte=now_minus_delta,
+            start__lt=now_plus_delta
     ).order_by('start')
 
     # TODO: Separate 'main_event' (soonest to happen) from other_events'
+    #       To make formatting easier
     return render(request, 'index.html', {
         'events': events
     })
@@ -77,38 +77,8 @@ def revoke(request):
 
 
 @login_required
-@with_authenticated_calendar_service
-def refresh_events_in_db(request, calendar_service):
-    def to_utc_str(dt):
-        return dt.isoformat() + 'Z'
-
-    def parse(dt):
-        return dateutil.parser.isoparse(dt)
-
-    now = datetime.datetime.utcnow()
-    now_plus_2_days = datetime.datetime.utcnow() + datetime.timedelta(days=2)
-    now_minus_1_hour = datetime.datetime.utcnow() + datetime.timedelta(hours=1)
-    events = calendar_service \
-        .events() \
-        .list(calendarId=ICE_CREAM_CALENDAR_ID,
-              timeMin=to_utc_str(now),
-              timeMax=to_utc_str(now_plus_2_days),
-              maxResults=10,
-              singleEvents=True,
-              orderBy='startTime') \
-        .execute() \
-        .get('items', [])
-
-    for event in events:
-        google_id = event['id']
-        if not Event.objects.filter(google_id=google_id).exists():
-            event = Event(google_id=google_id,
-                          summary=(event['summary']),
-                          start=(parse(event['start']['dateTime'])),
-                          end=(parse(event['end']['dateTime'])))
-            event.save()
-
-    # TODO: Delete events that are 1h in the past see: 'now_minus_1_hour'
+def refresh_events_in_db(request):
+    calendar.refresh_all_events_in_shared_calendar()
     return redirect('index')
 
 

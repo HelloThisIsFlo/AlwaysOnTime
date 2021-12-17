@@ -140,7 +140,7 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
-# For All-Auth
+####### For All-Auth #########
 AUTHENTICATION_BACKENDS = [
     # Needed to login by username in Django admin, regardless of `allauth`
     'django.contrib.auth.backends.ModelBackend',
@@ -183,3 +183,10 @@ INSTALLED_APPS = INSTALLED_APPS + [
 ACCOUNT_EMAIL_VERIFICATION = 'none'
 
 LOGIN_URL = '/accounts/login/'
+
+####### For my App #########
+
+SHARED_CALENDAR_ID = 'c_u2p0q67mc81rqekasjdtu83ng4@group.calendar.google.com'
+SHARED_CALENDAR_OWNER = 'flori@nkempenich.com'
+TIMERS_SHOW_X_MIN_PAST = 30
+TIMERS_SHOW_X_MIN_FUTURE = 12 * 60
