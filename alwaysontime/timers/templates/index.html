@@ -43,6 +43,7 @@
         .due {
             color: #fa2c2c;
         }
+
         .due-soon {
             color: #fa962c;
         }
@@ -76,19 +77,30 @@
 <div class="container">
     <h1 class="title has-text-centered">Always On Time</h1>
     <div class="timers">
-        <h2 class="subtitle is-3">Main Event</h2>
-        <div class="card timer main-event">
-            <div class="card-content">
-                <div class="media">
-                    <div class="media-content">
-                        <div class="summary">{{ main_event.summary }}</div>
+        {% if main_event %}
+            <h2 class="subtitle is-3">Main Event</h2>
+            <div class="card timer main-event">
+                <div class="card-content">
+                    <div class="media">
+                        <div class="media-content">
+                            <div class="summary">{{ main_event.summary }}</div>
+                        </div>
+                    </div>
+                    <div class="content">
+                        <p class="time is-size-2" data-start="{{ main_event.start|date:"r" }}"></p>
                     </div>
                 </div>
-                <div class="content">
-                    <p class="time is-size-2" data-start="{{ main_event.start|date:"r" }}"></p>
+            </div>
+        {% else %}
+            <h2 class="subtitle is-3">Main Event</h2>
+            <div class="card timer main-event">
+                <div class="card-content">
+                    <div class="content">
+                        <p class="is-size-2" >No Events</p>
+                    </div>
                 </div>
             </div>
-        </div>
+        {% endif %}
 
         {% if other_events %}
             <h2 class="subtitle is-3">Later Events</h2>
