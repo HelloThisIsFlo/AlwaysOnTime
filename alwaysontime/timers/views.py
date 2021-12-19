@@ -23,7 +23,7 @@ from timers.models import Event
 
 def with_authenticated_calendar_service(endpoint_func):
     @wraps(endpoint_func)
-    def wrapped(request):
+    def wrapper(request):
         social_token = SocialToken.objects.get(account__user=request.user)
         creds = Credentials(token=social_token.token,
                             refresh_token=social_token.token_secret,
@@ -45,7 +45,7 @@ def with_authenticated_calendar_service(endpoint_func):
 
         return resp
 
-    return wrapped
+    return wrapper
 
 
 @login_required
@@ -90,8 +90,26 @@ def refresh_events_in_db(request):
 @login_required
 @with_authenticated_calendar_service
 def sandbox(request, calendar_service):
-    # Do nothing
-    return redirect('index')
+    def to_google_format(dt):
+        return dt.strftime('%Y-%m-%dT%H:%M:%SZ')
+
+    list_calendars(calendar_service)
+
+    now = timezone.now()
+    now_minus_1_hour = now - datetime.timedelta(days=1)
+    now_plus_7_days = now + datetime.timedelta(days=7)
+    events = calendar_service \
+        .events() \
+        .list(calendarId='primary',
+              timeMin=to_google_format(now_minus_1_hour),
+              timeMax=to_google_format(now_plus_7_days),
+              maxResults=100,
+              singleEvents=True,
+              orderBy='startTime') \
+        .execute() \
+        .get('items', [])
+
+    return HttpResponse(f'{events=}')
 
 
 def list_calendars(service):
