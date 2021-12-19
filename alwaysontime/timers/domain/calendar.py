@@ -1,5 +1,4 @@
 import datetime
-from datetime import timedelta
 from threading import Thread
 
 import dateutil.parser
@@ -21,24 +20,17 @@ def refresh_all_events_in_shared_calendar_in_the_background():
 
 def refresh_all_events_in_shared_calendar():
     events = _load_events_from_calendar()
-    update_events_in_db(events)
-    clean_up_old_events_from_db()
+    replace_all_events_in_db(events)
 
 
-def update_events_in_db(events):
+def replace_all_events_in_db(events):
+    Event.objects.all().delete()
     for event in events:
         event = Event(google_id=(event['id']),
                       summary=(event['summary']),
                       start=(_parse(event['start']['dateTime'])),
                       end=(_parse(event['end']['dateTime'])))
         event.save()
-
-
-def clean_up_old_events_from_db():
-    now_minus_delta = timezone.now() - timedelta(minutes=settings.TIMERS_SHOW_X_MIN_PAST)
-    Event.objects \
-        .filter(start__lt=now_minus_delta) \
-        .delete()
 
 
 def _load_events_from_calendar():
@@ -50,14 +42,14 @@ def _load_events_from_calendar():
         calendar_service = build('calendar', 'v3', credentials=creds)
 
         now = timezone.now()
-        now_minus_1_hour = now - datetime.timedelta(hours=1)
-        now_plus_2_days = now + datetime.timedelta(days=2)
+        now_minus_1_hour = now - datetime.timedelta(days=1)
+        now_plus_7_days = now + datetime.timedelta(days=7)
         return calendar_service \
             .events() \
             .list(calendarId=settings.SHARED_CALENDAR_ID,
                   timeMin=to_google_format(now_minus_1_hour),
-                  timeMax=to_google_format(now_plus_2_days),
-                  maxResults=10,
+                  timeMax=to_google_format(now_plus_7_days),
+                  maxResults=100,
                   singleEvents=True,
                   orderBy='startTime') \
             .execute() \
