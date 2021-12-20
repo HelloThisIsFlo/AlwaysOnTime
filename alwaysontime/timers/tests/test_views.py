@@ -18,20 +18,6 @@ TEST_GOOGLE_TOKEN = 'abcdefg123456'
 pytestmark = pytest.mark.django_db
 
 
-def create_test_user():
-    test_user = User.objects.create_user(
-            username=TEST_USERNAME,
-            email='testuser@gmail.com',
-            password=TEST_PASSWORD
-    )
-    SocialToken.objects.create(
-            account=SocialAccount.objects.create(user=test_user),
-            app=SocialApp.objects.create(),
-            token=TEST_GOOGLE_TOKEN,
-    )
-    return test_user
-
-
 @pytest.fixture
 def test_user_without_google_credentials():
     return User.objects.create_user(
