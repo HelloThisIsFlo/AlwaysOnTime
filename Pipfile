@@ -11,6 +11,7 @@ google-auth-oauthlib = "*"
 django-allauth = "*"
 python-dateutil = "*"
 requests = "*"
+pytest-django = "*"
 
 [dev-packages]
 
