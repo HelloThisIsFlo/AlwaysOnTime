@@ -1,5 +1,6 @@
 # Create your tests here.
 from datetime import timedelta
+from unittest.mock import patch
 
 from allauth.socialaccount.models import SocialToken, SocialAccount, SocialApp
 from dateutil.parser import isoparse
@@ -13,6 +14,20 @@ from timers.models import Event
 TEST_PASSWORD = 'testuser1234@'
 TEST_USERNAME = 'testuser'
 TEST_GOOGLE_TOKEN = 'abcdefg123456'
+
+
+def create_test_user():
+    test_user = User.objects.create_user(
+            username=TEST_USERNAME,
+            email='testuser@gmail.com',
+            password=TEST_PASSWORD
+    )
+    SocialToken.objects.create(
+            account=SocialAccount.objects.create(user=test_user),
+            app=SocialApp.objects.create(),
+            token=TEST_GOOGLE_TOKEN,
+    )
+    return test_user
 
 
 class SandboxTestCase(TestCase):
@@ -64,19 +79,7 @@ class HomePage_FailureScenario(TestCase):
 
 class HomePage_SuccessScenario(TestCase):
     def setUp(self):
-        # Create the User & associate Google Token
-        test_user = User.objects.create_user(
-                username=TEST_USERNAME,
-                email='testuser@gmail.com',
-                password=TEST_PASSWORD
-        )
-        SocialToken.objects.create(
-                account=SocialAccount.objects.create(user=test_user),
-                app=SocialApp.objects.create(),
-                token=TEST_GOOGLE_TOKEN,
-        )
-
-        # Login
+        create_test_user()
         self.client.login(username=TEST_USERNAME,
                           password=TEST_PASSWORD)
 
@@ -143,3 +146,27 @@ class HomePage_SuccessScenario(TestCase):
 
         self.assertIn('other_events', response.context)
         self.assertEqual(len(response.context['other_events']), 0)
+
+
+class RefreshEvents(TestCase):
+    def setUp(self):
+        refresh_all_events_patcher = \
+            patch('timers.views.refresh_all_events')
+        self.refresh_all_events_mock = refresh_all_events_patcher.start()
+        self.addCleanup(refresh_all_events_patcher.stop)
+
+        self.test_user = create_test_user()
+
+    def test_returns_error_if_user_not_logged_in(self):
+        response = self.client.post('/events/refresh/')
+        self.assertContains(response,
+                            "Please log in before refreshing!",
+                            status_code=401)
+
+    def test_refreshes_the_events_of_logged_in_user(self):
+        self.client.login(username=TEST_USERNAME,
+                          password=TEST_PASSWORD)
+        response = self.client.post('/events/refresh/')
+
+        self.assertContains(response, "Ok", status_code=200)
+        self.refresh_all_events_mock.assert_called_with(self.test_user)

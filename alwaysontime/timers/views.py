@@ -17,7 +17,7 @@ from googleapiclient.errors import HttpError
 from alwaysontime.settings import GOOGLE_SCOPES
 from timers.domain import calendar
 from timers.domain.calendar import \
-    refresh_all_events_in_shared_calendar_in_the_background
+    refresh_all_events_in_shared_calendar_in_the_background, refresh_all_events
 from timers.models import Event
 
 
@@ -118,3 +118,10 @@ def list_calendars(service):
     calendars = calendar_list_result.get('items', [])
     for c in calendars:
         print(f"{c['id']=} {c['summary']=}")
+
+
+def events_refresh(request):
+    if not request.user.is_authenticated:
+        return HttpResponse("Please log in before refreshing!", status=401)
+    refresh_all_events(request.user)
+    return HttpResponse("Ok")

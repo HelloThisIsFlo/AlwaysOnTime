@@ -23,6 +23,10 @@ def refresh_all_events_in_shared_calendar():
     replace_all_events_in_db(events)
 
 
+def refresh_all_events(user):
+    pass
+
+
 def replace_all_events_in_db(events):
     Event.objects.all().delete()
     for event in events:
