@@ -8,6 +8,7 @@ from pytest_django.asserts import assertRedirects, assertTemplateUsed, \
     assertContains
 
 import conftest
+import timers.views
 from timers.models import Event
 
 pytestmark = pytest.mark.django_db
@@ -101,7 +102,7 @@ class TestRefreshEvents:
                        "Please log in before refreshing!",
                        status_code=401)
 
-    @patch('timers.views.refresh_all_events')
+    @patch.object(timers.views, 'refresh_all_events')
     def test_refreshes_the_events_of_logged_in_user(
             self, refresh_all_events_mock, logged_in_test_user, client
     ):

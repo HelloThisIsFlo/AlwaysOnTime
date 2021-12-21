@@ -15,8 +15,8 @@ from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
 from alwaysontime.settings import GOOGLE_SCOPES
-from timers.domain import calendar
-from timers.domain.calendar import \
+from timers import calendar
+from timers.calendar import \
     refresh_all_events_in_shared_calendar_in_the_background, refresh_all_events
 from timers.models import Event
 
