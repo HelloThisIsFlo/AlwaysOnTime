@@ -31,12 +31,22 @@ def refresh_all_events(user):
     active_calendars = list(Calendar.objects.filter(user=user, active=True))
     now = timezone.now()
     for cal in active_calendars:
-        calendar_api.events(
+        events = calendar_api.events(
                 cal.google_id,
                 before=now - timedelta(hours=1),
                 after=now + timedelta(days=2),
                 order_by='startTime'
         )
+        for event in events:
+            event = Event(google_id=event['id'],
+                          summary=event['summary'],
+                          start=event['start'],
+                          end=event['end'],
+                          calendar=cal)
+            event.save()
+
+        all_event_ids = [e['id'] for e in events]
+        Event.objects.exclude(google_id__in=all_event_ids).delete()
 
 
 def replace_all_events_in_db(events):
