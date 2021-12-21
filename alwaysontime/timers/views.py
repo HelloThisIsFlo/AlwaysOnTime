@@ -67,7 +67,7 @@ def index(request):
 
     return render(request, 'index.html', {
         'main_event': events[0] if events else None,
-        'other_events': events[1:] if len(events) >= 2 else []
+        'other_events': events[1:]
     })
 
 
