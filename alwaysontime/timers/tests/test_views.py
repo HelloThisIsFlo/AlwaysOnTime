@@ -38,19 +38,22 @@ class TestHomePage:
             assertTemplateUsed(response, 'index.html')
 
         def test_return_next_event_in_time_as_main_event_and_rest_as_other_events(
-                self, client, logged_in_test_user
+                self, client, logged_in_test_user, test_calendar
         ):
             not_used = timezone.now() + timedelta(hours=10)
             Event(google_id='1',
                   summary='Starts in 4 hours',
+                  calendar=test_calendar,
                   start=timezone.now() + timedelta(hours=4),
                   end=not_used).save()
             Event(google_id='2',
                   summary='Starts in 1 minutes: This is the next one in time',
+                  calendar=test_calendar,
                   start=timezone.now() + timedelta(minutes=1),
                   end=not_used).save()
             Event(google_id='3',
                   summary='Starts in 2 hours',
+                  calendar=test_calendar,
                   start=timezone.now() + timedelta(hours=2),
                   end=not_used).save()
 
@@ -67,11 +70,12 @@ class TestHomePage:
             assert other_events[1].summary == 'Starts in 4 hours'
 
         def test_return_only_main_event_if_no_other_events(
-                self, client, logged_in_test_user
+                self, client, logged_in_test_user, test_calendar
         ):
             not_used = timezone.now() + timedelta(hours=10)
             Event(google_id='1',
                   summary='Starts in 1 minutes: This is the next one in time',
+                  calendar=test_calendar,
                   start=timezone.now() + timedelta(minutes=1),
                   end=not_used).save()
 

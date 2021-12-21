@@ -2,8 +2,11 @@ import pytest
 from allauth.socialaccount.models import SocialToken, SocialAccount, SocialApp
 from django.contrib.auth.models import User
 
+from timers.models import Calendar
+
 TEST_PASSWORD = 'testuser1234@'
 TEST_USERNAME = 'testuser'
+TEST_CALENDAR_ID = 'test_calendar_id'
 TEST_GOOGLE_TOKEN = 'abcdefg123456'
 TEST_GOOGLE_REFRESH_TOKEN = 'zyxvgadf482'
 TEST_GOOGLE_APP_CLIENT_ID = 'google_app_client_id'
@@ -43,3 +46,13 @@ def logged_in_test_user(test_user, client):
             password=TEST_PASSWORD
     )
     return test_user
+
+
+@pytest.fixture
+def test_calendar(test_user):
+    return Calendar.objects.create(
+            google_id=TEST_CALENDAR_ID,
+            active=True,
+            name='test_calendar',
+            user=test_user
+    )
