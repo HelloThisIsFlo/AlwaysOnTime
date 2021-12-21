@@ -5,6 +5,9 @@ from django.contrib.auth.models import User
 TEST_PASSWORD = 'testuser1234@'
 TEST_USERNAME = 'testuser'
 TEST_GOOGLE_TOKEN = 'abcdefg123456'
+TEST_GOOGLE_REFRESH_TOKEN = 'zyxvgadf482'
+TEST_GOOGLE_APP_CLIENT_ID = 'google_app_client_id'
+TEST_GOOGLE_APP_SECRET = 'google_app_client_secret'
 
 
 @pytest.fixture
@@ -21,9 +24,14 @@ def test_user(test_user_without_google_credentials):
     test_user = test_user_without_google_credentials
     SocialToken.objects.create(
             account=SocialAccount.objects.create(
-                    user=test_user),
-            app=SocialApp.objects.create(),
+                    user=test_user
+            ),
+            app=SocialApp.objects.create(
+                    client_id=TEST_GOOGLE_APP_CLIENT_ID,
+                    secret=TEST_GOOGLE_APP_SECRET
+            ),
             token=TEST_GOOGLE_TOKEN,
+            token_secret=TEST_GOOGLE_REFRESH_TOKEN
     )
     return test_user
 
