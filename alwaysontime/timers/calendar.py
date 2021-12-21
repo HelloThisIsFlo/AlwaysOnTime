@@ -1,4 +1,4 @@
-import datetime
+from datetime import timedelta
 from threading import Thread
 
 import dateutil.parser
@@ -11,7 +11,8 @@ from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
 from alwaysontime.settings import GOOGLE_SCOPES
-from timers.models import Event
+from timers.google_api import GoogleCalendarApi
+from timers.models import Event, Calendar
 
 
 def refresh_all_events_in_shared_calendar_in_the_background():
@@ -24,7 +25,18 @@ def refresh_all_events_in_shared_calendar():
 
 
 def refresh_all_events(user):
-    pass
+    social_token = SocialToken.objects.filter(account__user=user).get()
+    calendar_api = GoogleCalendarApi(token=social_token.token,
+                                     refresh_token=social_token.token_secret)
+    active_calendars = list(Calendar.objects.filter(user=user, active=True))
+    now = timezone.now()
+    for cal in active_calendars:
+        calendar_api.events(
+                cal.google_id,
+                before=now - timedelta(hours=1),
+                after=now + timedelta(days=2),
+                order_by='startTime'
+        )
 
 
 def replace_all_events_in_db(events):
@@ -46,8 +58,8 @@ def _load_events_from_calendar():
         calendar_service = build('calendar', 'v3', credentials=creds)
 
         now = timezone.now()
-        now_minus_1_hour = now - datetime.timedelta(days=1)
-        now_plus_7_days = now + datetime.timedelta(days=7)
+        now_minus_1_hour = now - timedelta(days=1)
+        now_plus_7_days = now + timedelta(days=7)
         return calendar_service \
             .events() \
             .list(calendarId=settings.SHARED_CALENDAR_ID,
