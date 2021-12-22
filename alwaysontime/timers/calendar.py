@@ -18,16 +18,23 @@ def refresh_events(user):
                 after=now + timedelta(days=2),
                 order_by='startTime'
         )
-        for event in events:
-            event = Event(google_id=event['id'],
-                          summary=event['summary'],
-                          start=event['start'],
-                          end=event['end'],
-                          calendar=cal)
+        for e in events:
+            e_id = e['id']
+            if Event.objects.filter(google_id=e_id, calendar=cal).exists():
+                event = Event.objects.get(google_id=e_id, calendar=cal)
+            else:
+                event = Event(google_id=e_id)
+            event.summary = e['summary']
+            event.start = e['start']
+            event.end = e['end']
+            event.calendar = cal
             event.save()
 
         all_event_ids = [e['id'] for e in events]
-        Event.objects.exclude(google_id__in=all_event_ids).delete()
+        Event.objects \
+            .filter(calendar=cal) \
+            .exclude(google_id__in=all_event_ids) \
+            .delete()
 
 
 def _get_calendar_api_for(user):
@@ -42,17 +49,18 @@ def refresh_calendars(user):
     calendars = calendar_api.calendars()
     for cal in calendars:
         cal_id = cal['id']
-        if Calendar.objects.filter(google_id=cal_id).exists():
-            calendar = Calendar.objects.get(google_id=cal_id)
-            calendar.name = cal['name']
+        if Calendar.objects.filter(google_id=cal_id, user=user).exists():
+            calendar = Calendar.objects.get(google_id=cal_id, user=user)
         else:
-            calendar = Calendar(google_id=cal_id,
-                                name=cal['name'],
-                                user=user,
-                                active=False)
+            calendar = Calendar(google_id=cal_id, user=user, active=False)
+        calendar.name = cal['name']
         calendar.save()
 
     all_calendar_ids = [c['id'] for c in calendars]
-    for calendar in Calendar.objects.exclude(google_id__in=all_calendar_ids):
+
+    inactive_calendars = Calendar.objects \
+        .filter(user=user) \
+        .exclude(google_id__in=all_calendar_ids)
+    for calendar in inactive_calendars:
         calendar.active = False
         calendar.save()

@@ -58,3 +58,22 @@ def test_calendar(test_user):
             name='test_calendar',
             user=test_user
     )
+
+
+@pytest.fixture
+def another_user():
+    return User.objects.create_user(
+            username='another_user',
+            email='anotheruser@gmail.com',
+            password='asdfasdf@9394'
+    )
+
+
+@pytest.fixture
+def another_users_calendar(another_user):
+    return Calendar.objects.create(
+            google_id='id_another_user_calendar',
+            name='another_user_calendar',
+            user=another_user,
+            active=True
+    )

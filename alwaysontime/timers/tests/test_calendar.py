@@ -105,29 +105,43 @@ class TestRefreshEvents:
         assert event3.calendar == test_cal
 
     def test_update_existing_events(
-            self, GoogleCalendarApiMock, test_user
+            self, GoogleCalendarApiMock, test_user, test_calendar,
+            another_user, another_users_calendar
     ):
         api_mock = GoogleCalendarApiMock()
-        test_cal = create_test_calendar('cal1', active=True)
         Event.objects.create(google_id='id1',
-                             summary='EMPTY',
+                             summary='Should updated',
                              start=datetime.now(),
                              end=datetime.now(),
-                             calendar=test_cal)
+                             calendar=test_calendar)
+        Event.objects.create(google_id='id1',
+                             summary="Should NOT update <- Same 'google_id' "
+                                     "but different 'calendar'",
+                             start=datetime.now(),
+                             end=datetime.now(),
+                             calendar=another_users_calendar)
 
         start1 = datetime(year=2021, month=10, day=15, hour=10, minute=5)
         end1 = datetime(year=2021, month=10, day=15, hour=13, minute=5)
         api_mock.events.return_value = [
-            {'id': 'id1', 'summary': 's1', 'start': start1, 'end': end1},
+            {'id': 'id1', 'summary': 'UPDATED', 'start': start1, 'end': end1},
         ]
 
         calendar.refresh_events(test_user)
 
-        assert Event.objects.count() == 1
-        assert Event.objects.get(google_id='id1').summary == 's1'
+        assert Event.objects.count() == 2
+        assert Event.objects.get(
+                google_id='id1',
+                calendar__user=test_user
+        ).summary == 'UPDATED'
+        assert Event.objects.get(
+                google_id='id1',
+                calendar__user=another_user
+        ).summary == "Should NOT update <- Same 'google_id' " \
+                     "but different 'calendar'"
 
     def test_delete_all_events_not_returned_by_api(
-            self, GoogleCalendarApiMock, test_user
+            self, GoogleCalendarApiMock, test_user, another_users_calendar
     ):
         api_mock = GoogleCalendarApiMock()
         test_cal = create_test_calendar('cal1', active=True)
@@ -137,6 +151,11 @@ class TestRefreshEvents:
                              start=datetime.now(),
                              end=datetime.now(),
                              calendar=test_cal)
+        Event.objects.create(google_id='id1',
+                             summary='Should NOT be deleted <- different user',
+                             start=datetime.now(),
+                             end=datetime.now(),
+                             calendar=another_users_calendar)
 
         start2 = datetime(year=2021, month=10, day=15, hour=11, minute=5)
         end2 = datetime(year=2021, month=10, day=15, hour=14, minute=5)
@@ -146,8 +165,18 @@ class TestRefreshEvents:
 
         calendar.refresh_events(test_user)
 
-        assert not Event.objects.filter(google_id='id1').exists()
-        assert Event.objects.filter(google_id='id2').exists()
+        assert not Event.objects.filter(
+                google_id='id1',
+                calendar=test_cal
+        ).exists()
+        assert Event.objects.filter(
+                google_id='id1',
+                calendar=another_users_calendar
+        ).exists()
+        assert Event.objects.filter(
+                google_id='id2',
+                calendar=test_cal
+        ).exists()
 
 
 class TestCalendars:
@@ -224,8 +253,40 @@ class TestCalendars:
         assert cal1.name == 'exists in db and is active - UPDATE'
         assert cal1.active
 
+    def test_uses_google_id_and_user_to_determine_existing_calendars(
+            self, GoogleCalendarApiMock, test_user, another_user
+    ):
+        Calendar.objects.create(
+                google_id='shared_google_id',
+                name='To update',
+                user=test_user,
+                active=True
+        )
+        Calendar.objects.create(
+                google_id='shared_google_id',
+                name='DO NOT UPDATE <-- Different user',
+                user=another_user,
+                active=True
+        )
+        api_mock = GoogleCalendarApiMock()
+        api_mock.calendars.return_value = [
+            {'id': 'shared_google_id', 'name': 'UPDATED'}
+        ]
+
+        calendar.refresh_calendars(test_user)
+
+        assert Calendar.objects.count() == 2
+        assert Calendar.objects.get(
+                google_id='shared_google_id',
+                user=test_user
+        ).name == 'UPDATED'
+        assert Calendar.objects.get(
+                google_id='shared_google_id',
+                user=another_user
+        ).name == 'DO NOT UPDATE <-- Different user'
+
     def test_marks_calendars_not_returned_by_api_as_inactive(
-            self, GoogleCalendarApiMock, test_user
+            self, GoogleCalendarApiMock, test_user, another_user
     ):
         Calendar.objects.create(google_id='id1',
                                 name='active',
@@ -234,6 +295,11 @@ class TestCalendars:
         Calendar.objects.create(google_id='id2',
                                 name='active => will be set to inactive',
                                 user=test_user,
+                                active=True)
+        Calendar.objects.create(google_id='id2',
+                                name='keep active'
+                                     ' <- another user, same google_id',
+                                user=another_user,
                                 active=True)
         api_mock = GoogleCalendarApiMock()
         api_mock.calendars.return_value = [
@@ -244,7 +310,14 @@ class TestCalendars:
         calendar.refresh_calendars(test_user)
 
         assert Calendar.objects.filter(google_id='id2').exists()
-        assert not Calendar.objects.get(google_id='id2').active
+        assert not Calendar.objects.get(
+                google_id='id2',
+                user=test_user
+        ).active
+        assert Calendar.objects.get(
+                google_id='id2',
+                user=another_user
+        ).active
 
 
 def create_test_calendar(google_id, active):

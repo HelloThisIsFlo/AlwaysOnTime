@@ -6,14 +6,14 @@ from django.db import models
 
 
 class Calendar(models.Model):
-    google_id = models.CharField(max_length=100, primary_key=True)
+    google_id = models.CharField(max_length=100)
     name = models.CharField(max_length=100)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     active = models.BooleanField(default=False)
 
 
 class Event(models.Model):
-    google_id = models.CharField(max_length=100, primary_key=True)
+    google_id = models.CharField(max_length=100)
     # TODO: Rename 'summary' -> 'name'
     summary = models.CharField(max_length=100)
     start = models.DateTimeField()

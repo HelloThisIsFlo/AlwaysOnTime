@@ -9,11 +9,15 @@ def delete_all_existing_events(apps, schema_editor):
     Event.objects.using(db_alias).all().delete()
 
 
+def do_nothing(apps, schema_editor):
+    pass
+
+
 class Migration(migrations.Migration):
     dependencies = [
         ('timers', '0003_event_calendar'),
     ]
 
     operations = [
-        migrations.RunPython(delete_all_existing_events)
+        migrations.RunPython(delete_all_existing_events, do_nothing)
     ]
