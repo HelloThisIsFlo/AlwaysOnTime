@@ -191,3 +191,4 @@ SHARED_CALENDAR_ID = 'c_u2p0q67mc81rqekasjdtu83ng4@group.calendar.google.com'
 SHARED_CALENDAR_OWNER = 'flori@nkempenich.com'
 TIMERS_SHOW_X_MIN_PAST = 30
 TIMERS_SHOW_X_MIN_FUTURE = 12 * 60
+GOOGLE_APP_NAME = 'Google'

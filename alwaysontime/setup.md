@@ -41,7 +41,9 @@ Using SQLite 3
       - `1` if only element in table
   - In `Social Application`
     - Configure Google
-      - `Provider`: “Google”
+      - `Provider`: `Google`
+        - **Important:** That name is used in the app and configured in the settings.
+          Make sure to write exactly as it is
       - `Name`: Whatever
       - `Client id`: Called `Client ID` by Google
       - `Secret key`: Called `Client secret` by Google

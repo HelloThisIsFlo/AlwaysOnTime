@@ -2,18 +2,37 @@ from unittest.mock import patch
 
 import pytest
 
-import timers.calendar
+import timers.google_api
 from alwaysontime.settings import GOOGLE_SCOPES
 from conftest import TEST_GOOGLE_TOKEN, TEST_GOOGLE_REFRESH_TOKEN, \
     TEST_GOOGLE_APP_CLIENT_ID, TEST_GOOGLE_APP_SECRET
 from timers.calendar import refresh_all_events
+from timers.google_api import GoogleCalendarApi
 
 pytestmark = pytest.mark.django_db
 
 
 class TestInit:
-    def test_create_credentials_from_user_token(self):
-        pass
+    @patch.object(timers.google_api, 'Credentials')
+    def test_create_credentials_from_user_token_using_google_app(
+            self, CredentialsMock, test_user
+    ):
+        CredentialsMock().expired = False
+        CredentialsMock.reset_mock()
+
+        token = 'token'
+        refresh_token = 'refresh_token'
+
+        GoogleCalendarApi(token, refresh_token)
+
+        CredentialsMock.assert_called_once_with(
+                token=token,
+                refresh_token=refresh_token,
+                token_uri='https://oauth2.googleapis.com/token',
+                client_id=TEST_GOOGLE_APP_CLIENT_ID,
+                client_secret=TEST_GOOGLE_APP_SECRET,
+                scopes=GOOGLE_SCOPES
+        )
 
     def test_refresh_credentials_if_expired(self):
         pass
@@ -26,7 +45,6 @@ class TestInit:
 
 
 class TestEvents:
-
     def test_call_endpoint_with_correct_parameters(self):
         # now_plus_7_days = now + datetime.timedelta(days=7)
         # return calendar_service \

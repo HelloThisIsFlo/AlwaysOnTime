@@ -1,5 +1,6 @@
 import pytest
 from allauth.socialaccount.models import SocialToken, SocialAccount, SocialApp
+from django.conf import settings
 from django.contrib.auth.models import User
 
 from timers.models import Calendar
@@ -30,6 +31,7 @@ def test_user(test_user_without_google_credentials):
                     user=test_user
             ),
             app=SocialApp.objects.create(
+                    name=settings.GOOGLE_APP_NAME,
                     client_id=TEST_GOOGLE_APP_CLIENT_ID,
                     secret=TEST_GOOGLE_APP_SECRET
             ),
