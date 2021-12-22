@@ -60,3 +60,6 @@ class GoogleCalendarApi:
             'end': parse_date(event['end']['dateTime'],
                               event['end']['timeZone'])
         }
+
+    def calendars(self):
+        pass
