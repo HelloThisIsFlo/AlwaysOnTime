@@ -140,6 +140,11 @@
 </aside>
 <script>
     const DEBUG_MODE = false;
+
+    fetch('/events/refresh')
+        .then(resp => resp.text())
+        .then(resp => console.log(`Refreshed events | Resp: ${resp}`))
+
     const timerTimeDivs = document.querySelectorAll('.timer .time')
 
     const formatTimer = timer => {
