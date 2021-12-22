@@ -111,7 +111,8 @@ class TestHomePage:
             another_users_calendar = Calendar.objects.create(
                     google_id='id_another_user_calendar',
                     name='another_user_calendar',
-                    user=another_user
+                    user=another_user,
+                    active=True
             )
             not_used = timezone.now() + timedelta(hours=10)
             Event(google_id='1',
@@ -129,18 +130,39 @@ class TestHomePage:
 
             response = client.get('/')
 
-            assert 'main_event' in response.context
             assert response.context['main_event'].summary == \
                    "DO DISPLAY - Logged in user's event"
-
-            assert 'other_events' in response.context
             assert len(response.context['other_events']) == 0
 
-        @pytest.mark.skip('TODO')
         def test_return_only_events_for_active_calendars(
-                self, client, logged_in_test_user
+                self, client, logged_in_test_user, test_calendar
         ):
-            pass
+            inactive_calendar = Calendar.objects.create(
+                    google_id='id_another_user_calendar',
+                    name='another_user_calendar',
+                    user=logged_in_test_user,
+                    active=False
+            )
+
+            not_used = timezone.now() + timedelta(hours=10)
+            Event(google_id='1',
+                  summary="DONT DISPLAY - Event from inactive calendar",
+                  calendar=inactive_calendar,
+                  start=timezone.now() + timedelta(hours=2),
+                  end=not_used).save()
+
+            # Logged in user's event
+            Event(google_id='2',
+                  summary="DO DISPLAY - Event from active calendar",
+                  calendar=test_calendar,
+                  start=timezone.now() + timedelta(minutes=1),
+                  end=not_used).save()
+
+            response = client.get('/')
+
+            assert response.context['main_event'].summary == \
+                   "DO DISPLAY - Event from active calendar"
+            assert len(response.context['other_events']) == 0
 
 
 class TestRefreshEvents:

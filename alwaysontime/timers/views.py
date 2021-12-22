@@ -52,14 +52,13 @@ def index(request):
     if not SocialToken.objects.filter(account__user=request.user):
         return redirect('/accounts/social/connections/')
 
-    # refresh_all_events_in_shared_calendar_in_the_background()
-
     now = timezone.now()
     now_minus_delta = \
         now - datetime.timedelta(minutes=settings.TIMERS_SHOW_X_MIN_PAST)
     now_plus_delta = \
         now + datetime.timedelta(minutes=settings.TIMERS_SHOW_X_MIN_FUTURE)
     events = list(Event.objects.filter(
+            calendar__active=True,
             calendar__user=request.user,
             start__gte=now_minus_delta,
             start__lt=now_plus_delta
