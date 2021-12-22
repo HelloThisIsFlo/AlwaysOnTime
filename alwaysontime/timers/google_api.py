@@ -48,7 +48,7 @@ class GoogleCalendarApi:
     @staticmethod
     def _map_to_domain(event):
         def parse_date(date_str, timezone_name):
-            tz = pytz.timezone("Europe/London")
+            tz = pytz.timezone(timezone_name)
             dt = dateutil.parser.isoparse(date_str)
             return dt.replace(tzinfo=tz)
 
