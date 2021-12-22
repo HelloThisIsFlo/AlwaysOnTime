@@ -3,13 +3,14 @@ from datetime import timedelta
 from unittest.mock import patch
 
 import pytest
+from django.contrib.auth.models import User
 from django.utils import timezone
 from pytest_django.asserts import assertRedirects, assertTemplateUsed, \
     assertContains
 
 import conftest
 import timers.views
-from timers.models import Event
+from timers.models import Event, Calendar
 
 pytestmark = pytest.mark.django_db
 
@@ -98,6 +99,48 @@ class TestHomePage:
 
             assert 'other_events' in response.context
             assert len(response.context['other_events']) == 0
+
+        def test_return_only_events_for_the_currently_logged_in_user(
+                self, client, logged_in_test_user, test_calendar
+        ):
+            another_user = User.objects.create_user(
+                    username='another_user',
+                    email='anotheruser@gmail.com',
+                    password='asdfasdf@9394'
+            )
+            another_users_calendar = Calendar.objects.create(
+                    google_id='id_another_user_calendar',
+                    name='another_user_calendar',
+                    user=another_user
+            )
+            not_used = timezone.now() + timedelta(hours=10)
+            Event(google_id='1',
+                  summary="DONT DISPLAY - Another user's event",
+                  calendar=another_users_calendar,
+                  start=timezone.now() + timedelta(hours=2),
+                  end=not_used).save()
+
+            # Logged in user's event
+            Event(google_id='2',
+                  summary="DO DISPLAY - Logged in user's event",
+                  calendar=test_calendar,
+                  start=timezone.now() + timedelta(minutes=1),
+                  end=not_used).save()
+
+            response = client.get('/')
+
+            assert 'main_event' in response.context
+            assert response.context['main_event'].summary == \
+                   "DO DISPLAY - Logged in user's event"
+
+            assert 'other_events' in response.context
+            assert len(response.context['other_events']) == 0
+
+        @pytest.mark.skip('TODO')
+        def test_return_only_events_for_active_calendars(
+                self, client, logged_in_test_user
+        ):
+            pass
 
 
 class TestRefreshEvents:

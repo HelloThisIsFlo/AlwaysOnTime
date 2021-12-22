@@ -60,6 +60,7 @@ def index(request):
     now_plus_delta = \
         now + datetime.timedelta(minutes=settings.TIMERS_SHOW_X_MIN_FUTURE)
     events = list(Event.objects.filter(
+            calendar__user=request.user,
             start__gte=now_minus_delta,
             start__lt=now_plus_delta
     ).order_by('start'))
