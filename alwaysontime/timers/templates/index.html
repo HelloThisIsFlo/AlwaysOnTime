@@ -148,11 +148,11 @@
     const timerTimeDivs = document.querySelectorAll('.timer .time')
 
     const formatTimer = timer => {
-        const floor_pos = n => n <= 0 ? 0 : Math.floor(n)
-        const days = floor_pos(timer / 1000 / 60 / 60 / 24)
-        const hours = floor_pos((timer / 1000 / 60 / 60) - days * 24)
-        const minutes = floor_pos((timer / 1000 / 60) - days * 24 * 60 - hours * 60)
-        const seconds = floor_pos((timer / 1000) - days * 24 * 60 * 60 - hours * 60 * 60 - minutes * 60)
+        const ceil_pos = n => n <= 0 ? 0 : Math.ceil(n)
+        const days = ceil_pos(timer / 1000 / 60 / 60 / 24)
+        const hours = ceil_pos((timer / 1000 / 60 / 60) - days * 24)
+        const minutes = ceil_pos((timer / 1000 / 60) - days * 24 * 60 - hours * 60)
+        const seconds = ceil_pos((timer / 1000) - days * 24 * 60 * 60 - hours * 60 * 60 - minutes * 60)
 
         const isDue = !hours && !minutes
         const lessThan1hLeft = !hours
