@@ -13,6 +13,7 @@ from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
+from ratelimit.decorators import ratelimit
 
 from alwaysontime.settings import GOOGLE_SCOPES
 from timers.calendar import refresh_events, refresh_calendars
@@ -118,6 +119,7 @@ def list_calendars(service):
         print(f"{c['id']=} {c['summary']=}")
 
 
+@ratelimit(key='user', rate='600/m', block=True)
 def events_refresh(request):
     if not request.user.is_authenticated:
         return HttpResponse("Please log in before refreshing!", status=401)
@@ -125,6 +127,7 @@ def events_refresh(request):
     return HttpResponse("Ok")
 
 
+@ratelimit(key='user', rate='600/m', block=True)
 def calendars_refresh(request):
     if not request.user.is_authenticated:
         return HttpResponse("Please log in before refreshing!", status=401)

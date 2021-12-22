@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "856065a7789fc91723af0573017013dd66023bb803c0cf66076f0a4740471efc"
+            "sha256": "451943de5a26d8b20352053c00e1263a4bef0ebf24cc3fa146ab149809875ed7"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -157,6 +157,14 @@
             ],
             "index": "pypi",
             "version": "==0.47.0"
+        },
+        "django-ratelimit": {
+            "hashes": [
+                "sha256:73223d860abd5c5d7b9a807fabb39a6220068129b514be8d78044b52607ab154",
+                "sha256:857e797f23de948b204a31dba9d88aea3ce731b7a5d926d0240c772e19b5486f"
+            ],
+            "index": "pypi",
+            "version": "==3.0.1"
         },
         "google-api-core": {
             "hashes": [
