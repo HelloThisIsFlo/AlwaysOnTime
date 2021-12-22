@@ -9,5 +9,6 @@ urlpatterns = [
     path('refresh_events_in_db/',
          views.refresh_events_in_db,
          name='refresh_events_in_db'),
-    path('events/refresh/', views.events_refresh, name='events_refresh')
+    path('events/refresh/', views.events_refresh, name='events_refresh'),
+    path('calendars/refresh/', views.calendars_refresh, name='calendars_refresh')
 ]

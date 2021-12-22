@@ -114,3 +114,20 @@ class TestRefreshEvents:
 
         assertContains(response, "Ok", status_code=200)
         refresh_events_mock.assert_called_with(logged_in_test_user)
+
+
+class TestRefreshCalendars:
+    def test_returns_error_if_user_not_logged_in(self, client):
+        response = client.post('/calendars/refresh/')
+        assertContains(response,
+                       "Please log in before refreshing!",
+                       status_code=401)
+
+    @patch.object(timers.views, 'refresh_calendars')
+    def test_refreshes_the_events_of_logged_in_user(
+            self, refresh_calendars_mock, logged_in_test_user, client
+    ):
+        response = client.post('/calendars/refresh/')
+
+        assertContains(response, "Ok", status_code=200)
+        refresh_calendars_mock.assert_called_with(logged_in_test_user)

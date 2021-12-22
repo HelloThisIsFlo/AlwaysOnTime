@@ -15,8 +15,7 @@ from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
 from alwaysontime.settings import GOOGLE_SCOPES
-from timers import calendar
-from timers.calendar import refresh_events
+from timers.calendar import refresh_events, refresh_calendars
 from timers.models import Event
 
 
@@ -123,4 +122,11 @@ def events_refresh(request):
     if not request.user.is_authenticated:
         return HttpResponse("Please log in before refreshing!", status=401)
     refresh_events(request.user)
+    return HttpResponse("Ok")
+
+
+def calendars_refresh(request):
+    if not request.user.is_authenticated:
+        return HttpResponse("Please log in before refreshing!", status=401)
+    refresh_calendars(request.user)
     return HttpResponse("Ok")
