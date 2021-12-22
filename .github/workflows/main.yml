@@ -27,7 +27,7 @@ jobs:
         run: docker-compose build
 
       - name: Run the tests
-        run: docker-compose run alwaysontime pipenv run python manage.py test
+        run: docker-compose run alwaysontime pipenv run pytest alwaysontime
 
       - name: Write docker certificates locally
         run: |
