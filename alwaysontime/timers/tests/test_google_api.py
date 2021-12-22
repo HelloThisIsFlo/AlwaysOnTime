@@ -1,6 +1,8 @@
+from datetime import datetime, timezone, timedelta
 from unittest.mock import patch
 
 import pytest
+import pytz
 
 import timers.google_api
 from alwaysontime.settings import GOOGLE_SCOPES
@@ -68,29 +70,118 @@ class TestInit:
                                            credentials=credentials_mock)
 
 
+@pytest.fixture
+def build_mock():
+    with patch.object(timers.google_api, 'build') as build_mock:
+        yield build_mock
+
+
+@pytest.fixture
+def google_api(CredentialsMock, build_mock):
+    return GoogleCalendarApi('not_used', 'not_used')
+
+
 class TestEvents:
-    def test_call_endpoint_with_correct_parameters(self):
-        # now_plus_7_days = now + datetime.timedelta(days=7)
-        # return calendar_service \
-        #     .events() \
-        #     .list(calendarId=settings.SHARED_CALENDAR_ID,
-        #           timeMin=to_google_format(now_minus_1_hour),
-        #           timeMax=to_google_format(now_plus_7_days),
-        #           maxResults=100,
-        #           singleEvents=True,
-        #           orderBy='startTime') \
-        #     .execute() \
-        #     .get('items', [])
-        pass
+    def test_call_endpoint_with_correct_parameters(self,
+                                                   test_user,
+                                                   google_api,
+                                                   build_mock):
+        calendar_id = 'id'
+        before__06_05_in_utc = datetime(
+                2020, 4, 2, 6, 5,
+                tzinfo=timezone.utc
+        )
+        after__16_45_in_utc_p3 = datetime(
+                2020, 4, 2, 16, 45,
+                tzinfo=timezone(timedelta(hours=3))
+        )
+        after__13_45_in_utc = datetime(
+                2020, 4, 2, 13, 45,
+                tzinfo=timezone.utc
+        )
+        # Sanity check
+        assert after__13_45_in_utc == after__16_45_in_utc_p3
+        order_by = 'order_by'
 
-    def test_returns_the_events(self):
-        # Test here that it extracts from the json response
-        pass
+        google_api.events(calendar_id,
+                          before__06_05_in_utc,
+                          after__16_45_in_utc_p3,
+                          order_by)
 
-    def test_returns_empty_list_if_no_events(self):
-        # Test here that it extracts from the json response
-        pass
+        service_mock = build_mock()
+        service_mock.events().list.assert_called_with(
+                calendarId=calendar_id,
+                timeMin='2020-04-02T06:05:00Z',
+                timeMax='2020-04-02T13:45:00Z',
+                maxResults=100,
+                singleEvents=True,
+                orderBy=order_by
+        )
 
+        service_mock.events().list().execute.assert_called_once()
+
+    def test_raises_if_called_with_naive_datetime(self,
+                                                  test_user,
+                                                  google_api,
+                                                  build_mock):
+        with pytest.raises(RuntimeError) as e:
+            before__without_timezone = datetime(2020, 4, 2, 6, 5)
+            after__without_timezone = datetime(2020, 4, 3, 8, 15)
+            google_api.events('not_used',
+                              before__without_timezone,
+                              after__without_timezone,
+                              'not_used')
+
+        assert str(e.value) == \
+               "Make sure to set 'tzinfo' in 'before' and 'after' parameters"
+
+    def test_returns_the_events(self, test_user, google_api, build_mock):
+        service_mock = build_mock()
+        service_mock.events().list().execute.return_value = {
+            'items': [{
+                'id': 'event_id_1234',
+                'summary': 'Some Event',
+                'start': {
+                    'dateTime': '2021-12-24T19:30:00Z',
+                    'timeZone': 'Europe/London'},
+                'end': {
+                    'dateTime': '2021-12-24T20:30:00Z',
+                    'timeZone': 'Europe/London'},
+            }]
+        }
+
+        unused = None
+        unused_dt = datetime.now(tz=pytz.utc)
+        events = google_api.events(unused, unused_dt, unused_dt, unused)
+
+        assert events == [
+            {
+                'id': 'event_id_1234',
+                'summary': 'Some Event',
+                'start': datetime(
+                        2021, 12, 24, 19, 30,
+                        tzinfo=pytz.timezone('Europe/London')
+                ),
+                'end': datetime(
+                        2021, 12, 24, 20, 30,
+                        tzinfo=pytz.timezone('Europe/London')
+                )
+            }
+        ]
+
+    def test_returns_empty_list_if_no_events(
+            self, test_user, google_api, build_mock
+    ):
+        service_mock = build_mock()
+        service_mock.events().list().execute.return_value = {}
+
+        unused = None
+        unused_dt = datetime.now(tz=pytz.utc)
+        events = google_api.events(unused, unused_dt, unused_dt, unused)
+
+        assert events == []
+
+    @pytest.mark.skip('TODO')
     def test_raise_error_if_request_failed(self):
         # Not sure how to test that. We'll see
         pass

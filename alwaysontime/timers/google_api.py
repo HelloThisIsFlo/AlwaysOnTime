@@ -1,3 +1,7 @@
+from datetime import timezone, timedelta
+
+import dateutil.parser
+import pytz
 from allauth.socialaccount.models import SocialApp
 from django.conf import settings
 from google.auth.transport.requests import Request
@@ -19,7 +23,40 @@ class GoogleCalendarApi:
         )
         if creds.expired:
             creds.refresh(Request())
-        calendar_service = build('calendar', 'v3', credentials=creds)
+        self.calendar_service = build('calendar', 'v3', credentials=creds)
 
     def events(self, calendar_id, before, after, order_by):
-        pass
+        def to_google_format(dt):
+            return dt.astimezone(timezone(timedelta(0))).strftime(
+                    '%Y-%m-%dT%H:%M:%SZ')
+
+        if not before.tzinfo or not after.tzinfo:
+            raise RuntimeError("Make sure to set 'tzinfo' in "
+                               "'before' and 'after' parameters")
+
+        events_from_google = self.calendar_service.events().list(
+                calendarId=calendar_id,
+                timeMin=to_google_format(before),
+                timeMax=to_google_format(after),
+                maxResults=100,
+                singleEvents=True,
+                orderBy=order_by
+        ).execute().get('items', [])
+
+        return [self._map_to_domain(e) for e in events_from_google]
+
+    @staticmethod
+    def _map_to_domain(event):
+        def parse_date(date_str, timezone_name):
+            tz = pytz.timezone("Europe/London")
+            dt = dateutil.parser.isoparse(date_str)
+            return dt.replace(tzinfo=tz)
+
+        return {
+            'id': event['id'],
+            'summary': event['summary'],
+            'start': parse_date(event['start']['dateTime'],
+                                event['start']['timeZone']),
+            'end': parse_date(event['end']['dateTime'],
+                              event['end']['timeZone'])
+        }

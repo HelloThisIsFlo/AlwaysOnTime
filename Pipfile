@@ -12,6 +12,7 @@ django-allauth = "*"
 python-dateutil = "*"
 requests = "*"
 pytest-django = "*"
+pytz = "*"
 
 [dev-packages]
 
