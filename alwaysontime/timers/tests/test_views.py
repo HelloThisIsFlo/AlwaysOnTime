@@ -106,11 +106,11 @@ class TestRefreshEvents:
                        "Please log in before refreshing!",
                        status_code=401)
 
-    @patch.object(timers.views, 'refresh_all_events')
+    @patch.object(timers.views, 'refresh_events')
     def test_refreshes_the_events_of_logged_in_user(
-            self, refresh_all_events_mock, logged_in_test_user, client
+            self, refresh_events_mock, logged_in_test_user, client
     ):
         response = client.post('/events/refresh/')
 
         assertContains(response, "Ok", status_code=200)
-        refresh_all_events_mock.assert_called_with(logged_in_test_user)
+        refresh_events_mock.assert_called_with(logged_in_test_user)

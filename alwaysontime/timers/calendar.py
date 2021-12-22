@@ -7,7 +7,7 @@ from timers.google_api import GoogleCalendarApi
 from timers.models import Event, Calendar
 
 
-def refresh_all_events(user):
+def refresh_events(user):
     social_token = SocialToken.objects.filter(account__user=user).get()
     calendar_api = GoogleCalendarApi(token=social_token.token,
                                      refresh_token=social_token.token_secret)

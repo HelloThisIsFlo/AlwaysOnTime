@@ -19,7 +19,7 @@ def sandbox():
 @patch.object(calendar, 'GoogleCalendarApi')
 def test_instantiate_google_api_with_user_tokens(GoogleCalendarApiMock,
                                                  test_user):
-    calendar.refresh_all_events(test_user)
+    calendar.refresh_events(test_user)
     GoogleCalendarApiMock.assert_called_once_with(
             token=TEST_GOOGLE_TOKEN,
             refresh_token=TEST_GOOGLE_REFRESH_TOKEN
@@ -33,7 +33,7 @@ def test_gets_events_for_all_active_calendars(GoogleCalendarApiMock, test_user):
     create_test_calendar('cal2', active=False)
     create_test_calendar('cal3', active=True)
 
-    calendar.refresh_all_events(test_user)
+    calendar.refresh_events(test_user)
 
     assert api_mock.events.call_count == 2
     api_mock.events.assert_has_calls([
@@ -52,7 +52,7 @@ def test_gets_events_in_the_right_timeframe_and_sorted_by_start_date(
     timezone_mock.now.return_value = now
     create_test_calendar('cal1', active=True)
 
-    calendar.refresh_all_events(test_user)
+    calendar.refresh_events(test_user)
 
     api_mock.events.assert_called_once_with(
             'cal1',
@@ -80,7 +80,7 @@ def test_save_events_to_the_db(
         {'id': 'id3', 'summary': 's3', 'start': start3, 'end': end3},
     ]
 
-    calendar.refresh_all_events(test_user)
+    calendar.refresh_events(test_user)
 
     assert Event.objects.filter(google_id='id1').exists()
     assert Event.objects.get(google_id='id1') == Event(google_id='id1',
@@ -120,7 +120,7 @@ def test_update_existing_events(
         {'id': 'id1', 'summary': 's1', 'start': start1, 'end': end1},
     ]
 
-    calendar.refresh_all_events(test_user)
+    calendar.refresh_events(test_user)
 
     assert Event.objects.count() == 1
     assert Event.objects.get(google_id='id1').summary == 's1'
@@ -145,7 +145,7 @@ def test_delete_all_events_not_returned_by_api(
         {'id': 'id2', 'summary': 's2', 'start': start2, 'end': end2}
     ]
 
-    calendar.refresh_all_events(test_user)
+    calendar.refresh_events(test_user)
 
     assert not Event.objects.filter(google_id='id1').exists()
     assert Event.objects.filter(google_id='id2').exists()
