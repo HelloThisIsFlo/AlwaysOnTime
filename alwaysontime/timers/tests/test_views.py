@@ -28,8 +28,9 @@ class TestHomePage:
             response = client.get('/')
             assertRedirects(response, '/accounts/social/connections/')
 
+        @pytest.mark.skip("TODO")
         def test_show_error_if_user_didnt_give_necessary_permissions(self):
-            # TODO
+            # Not sure how to test => Investigate
             pass
 
     class TestSuccessScenario:

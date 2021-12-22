@@ -96,7 +96,7 @@
             <div class="card timer main-event">
                 <div class="card-content">
                     <div class="content">
-                        <p class="is-size-2" >No Events</p>
+                        <p class="is-size-2">No Events</p>
                     </div>
                 </div>
             </div>
@@ -127,7 +127,8 @@
     </p>
     <ul class="menu-list">
         <li><a href="/sandbox">Run Sandbox</a></li>
-        <li><a href="/refresh_events_in_db">Manually refresh events in DB</a></li>
+        <li><a id="debug-refresh-calendars" href="#">Manually refresh calendars</a></li>
+        <li><a id="debug-refresh-events" href="#">Manually refresh events for active calendars</a></li>
         <li><a href="/revoke">Revoke token and Logout</a></li>
         <li><a href="/accounts/logout">Logout</a></li>
         <li><a href="/accounts/login/">Login</a></li>
@@ -174,19 +175,39 @@
 
 
     /*
-    * DEBUG - Reload every 2 sec
+    * DEBUG - Reload every X sec
     */
     const debugDiv = document.querySelector('.debug')
     let countDown = 2;
-    const debug = () => {
+    const reloadPagePeriodically = () => {
         if (!countDown) {
             location.reload();
         }
         debugDiv.textContent = `Reloading page in ${countDown}s`
         countDown--
-        setTimeout(debug, 1000)
+        setTimeout(reloadPagePeriodically, 1000)
     }
-    if (DEBUG_MODE) debug()
+    if (DEBUG_MODE) {
+        // reloadPagePeriodically()
+
+        debugMenuDiv = document.querySelector('.debug-menu')
+        debugMenuDiv.style.display = 'block';
+
+        document
+            .querySelector('#debug-refresh-calendars')
+            .addEventListener('click', () => {
+                fetch('/calendars/refresh')
+                    .then(resp => resp.text())
+                    .then(resp => console.log(`Refreshed calendars | Resp: ${resp}`))
+            })
+        document
+            .querySelector('#debug-refresh-events')
+            .addEventListener('click', () => {
+                fetch('/events/refresh')
+                    .then(resp => resp.text())
+                    .then(resp => console.log(`Refreshed events | Resp: ${resp}`))
+            })
+    }
 </script>
 </body>
 </html>
