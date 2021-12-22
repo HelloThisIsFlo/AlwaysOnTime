@@ -16,8 +16,7 @@ from googleapiclient.errors import HttpError
 
 from alwaysontime.settings import GOOGLE_SCOPES
 from timers import calendar
-from timers.calendar import \
-    refresh_all_events_in_shared_calendar_in_the_background, refresh_all_events
+from timers.calendar import refresh_all_events
 from timers.models import Event
 
 
@@ -53,7 +52,7 @@ def index(request):
     if not SocialToken.objects.filter(account__user=request.user):
         return redirect('/accounts/social/connections/')
 
-    refresh_all_events_in_shared_calendar_in_the_background()
+    # refresh_all_events_in_shared_calendar_in_the_background()
 
     now = timezone.now()
     now_minus_delta = \
@@ -83,7 +82,7 @@ def revoke(request):
 
 @login_required
 def refresh_events_in_db(request):
-    calendar.refresh_all_events_in_shared_calendar()
+    # calendar.refresh_all_events_in_shared_calendar()
     return redirect('index')
 
 
