@@ -43,10 +43,19 @@ class GoogleCalendarApi:
                 orderBy=order_by
         ).execute().get('items', [])
 
-        return [self._map_to_domain(e) for e in events_from_google]
+        return [self._map_event_to_domain(e) for e in events_from_google]
+
+    def calendars(self):
+        calendars_from_google = \
+            self.calendar_service \
+                .calendarList() \
+                .list() \
+                .execute() \
+                .get('items', [])
+        return [self._map_calendar_to_domain(c) for c in calendars_from_google]
 
     @staticmethod
-    def _map_to_domain(event):
+    def _map_event_to_domain(event):
         def parse_date(date_str, timezone_name):
             tz = pytz.timezone(timezone_name)
             dt = dateutil.parser.isoparse(date_str)
@@ -61,5 +70,7 @@ class GoogleCalendarApi:
                               event['end']['timeZone'])
         }
 
-    def calendars(self):
-        pass
+    @staticmethod
+    def _map_calendar_to_domain(calendar):
+        return {'id': calendar['id'],
+                'name': calendar['summary']}

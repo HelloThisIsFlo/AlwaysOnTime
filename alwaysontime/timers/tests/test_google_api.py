@@ -184,4 +184,60 @@ class TestEvents:
     @pytest.mark.skip('TODO')
     def test_raise_error_if_request_failed(self):
         # Not sure how to test that. We'll see
+        # There may be a 'HttpError' when
+        # - creating the credentials
+        # - building the service
+        # - querying the service
+        # Not sure if it can happen in all scenarios, but definitely in some
+        pass
+
+
+class TestCalendars:
+    def test_call_endpoint_with_no_parameters(
+            self, test_user, google_api, build_mock
+    ):
+        google_api.calendars()
+
+        service_mock = build_mock()
+        service_mock.calendarList().list.assert_called_once_with()
+        service_mock.calendarList().list().execute.assert_called_once()
+
+    def test_returns_the_calendars(self, test_user, google_api, build_mock):
+        service_mock = build_mock()
+        service_mock.calendarList().list().execute.return_value = {
+            'items': [
+                {'id': 'somecal@group.v.calendar.google.com',
+                 'summary': 'Birthdays'},
+                {'id': 'someothercal@group.calendar.google.com',
+                 'summary': 'My Calendar'}
+            ]
+        }
+
+        calendars = google_api.calendars()
+
+        assert calendars == [
+            {'id': 'somecal@group.v.calendar.google.com',
+             'name': 'Birthdays'},
+            {'id': 'someothercal@group.calendar.google.com',
+             'name': 'My Calendar'}
+        ]
+
+    def test_returns_empty_list_if_no_calendars(
+            self, test_user, google_api, build_mock
+    ):
+        service_mock = build_mock()
+        service_mock.calendarList().list().execute.return_value = {}
+
+        calendars = google_api.calendars()
+
+        assert calendars == []
+
+    @pytest.mark.skip('TODO')
+    def test_raise_error_if_request_failed(self):
+        # Not sure how to test that. We'll see
+        # There may be a 'HttpError' when
+        # - creating the credentials
+        # - building the service
+        # - querying the service
+        # Not sure if it can happen in all scenarios, but definitely in some
         pass
