@@ -8,3 +8,4 @@
 - [ ] Dynamic refresh of calendars in settings
   - [ ] Ajax to trigger refresh calendars
   - [ ] Show loading and fill with response
+- [ ] Show "No Active calendars => Go to Settings" if no active calendars

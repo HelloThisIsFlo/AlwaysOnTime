@@ -1,4 +1,5 @@
 # Create your tests here.
+import json
 from datetime import timedelta
 from unittest.mock import patch
 
@@ -279,3 +280,72 @@ class TestRefreshCalendars:
 
         assertContains(response, "Ok", status_code=200)
         refresh_calendars_mock.assert_called_with(logged_in_test_user)
+
+
+class TestUpdateCalendar:
+    def test_set_calendar_as_active(
+            self, client, logged_in_test_user, test_user_calendar):
+        test_user_calendar.active = False
+        test_user_calendar.save()
+
+        response = client.post(f'/calendars/{test_user_calendar.id}/',
+                               json.dumps({'active': True}),
+                               content_type="application/json")
+
+        assertContains(response, "Ok", status_code=200)
+        calendar = Calendar.objects.get(id=test_user_calendar.id)
+        assert calendar.active
+
+    def test_returns_error_if_user_not_logged_in(
+            self, client, test_user_calendar
+    ):
+        test_user_calendar.active = False
+        test_user_calendar.save()
+
+        response = client.post(f'/calendars/{test_user_calendar.id}/',
+                               json.dumps({'active': True}),
+                               content_type="application/json")
+
+        assertContains(response,
+                       "Please log in!",
+                       status_code=401)
+
+        calendar = Calendar.objects.get(id=test_user_calendar.id)
+        assert not calendar.active
+
+    def test_returns_error_if_missing_parameter(
+            self, client, logged_in_test_user, test_user_calendar
+    ):
+        response = client.post(f'/calendars/{test_user_calendar.id}/',
+                               json.dumps({}),
+                               content_type="application/json")
+        assertContains(response,
+                       "Missing 'active' parameter!",
+                       status_code=400)
+
+    def test_returns_error_if_calendar_doesnt_exist(
+            self, client, logged_in_test_user
+    ):
+        response = client.post('/calendars/1234/',
+                               json.dumps({'active': True}),
+                               content_type="application/json")
+        assertContains(response,
+                       "No calendar with id '1234'",
+                       status_code=404)
+
+    def test_can_only_set_calendars_for_logged_in_user(
+            self, client, logged_in_test_user,
+            another_user, another_user_calendar
+    ):
+        another_user_calendar.active = False
+        another_user_calendar.save()
+
+        response = client.post(f'/calendars/{another_user_calendar.id}/',
+                               json.dumps({'active': True}),
+                               content_type="application/json")
+
+        assertContains(response,
+                       f"No calendar with id '{another_user_calendar.id}'",
+                       status_code=404)
+        cal = Calendar.objects.get(id=another_user_calendar.id)
+        assert not cal.active

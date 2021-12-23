@@ -13,5 +13,8 @@ urlpatterns = [
     path('calendars/refresh/',
          views.calendars_refresh,
          name='calendars_refresh'),
+    path('calendars/<int:cal_id>/',
+         views.calendars_update,
+         name='calendars_update'),
     path('settings/', views.settings_page, name='settings')
 ]

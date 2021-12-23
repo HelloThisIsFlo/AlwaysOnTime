@@ -1,4 +1,5 @@
 import datetime
+import json
 from functools import wraps
 
 import requests
@@ -156,4 +157,22 @@ def calendars_refresh(request):
     if not request.user.is_authenticated:
         return HttpResponse("Please log in before refreshing!", status=401)
     refresh_calendars(request.user)
+    return HttpResponse("Ok")
+
+
+def calendars_update(request, cal_id):
+    if not request.user.is_authenticated:
+        return HttpResponse("Please log in!", status=401)
+
+    params = json.loads(request.body)
+    if 'active' not in params:
+        return HttpResponse("Missing 'active' parameter!", status=400)
+
+    if not Calendar.objects.filter(id=cal_id, user=request.user).exists():
+        return HttpResponse(f"No calendar with id '{cal_id}'", status=404)
+
+    calendar = Calendar.objects.get(id=cal_id)
+    calendar.active = params['active']
+    calendar.save()
+
     return HttpResponse("Ok")
