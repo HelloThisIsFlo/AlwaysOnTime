@@ -30,18 +30,17 @@ def refresh_events(user):
             event.calendar = cal
             event.save()
 
-        all_event_ids = [e['id'] for e in events]
+        all_event_ids_returned_by_google = [e['id'] for e in events]
         Event.objects \
             .filter(calendar=cal) \
-            .exclude(google_id__in=all_event_ids) \
+            .exclude(google_id__in=all_event_ids_returned_by_google) \
             .delete()
 
 
 def _get_calendar_api_for(user):
     social_token = SocialToken.objects.filter(account__user=user).get()
-    calendar_api = GoogleCalendarApi(token=social_token.token,
-                                     refresh_token=social_token.token_secret)
-    return calendar_api
+    return GoogleCalendarApi(token=social_token.token,
+                             refresh_token=social_token.token_secret)
 
 
 def refresh_calendars(user):
@@ -58,9 +57,10 @@ def refresh_calendars(user):
 
     all_calendar_ids = [c['id'] for c in calendars]
 
-    inactive_calendars = Calendar.objects \
+    calendars_not_returned_by_google = Calendar.objects \
         .filter(user=user) \
         .exclude(google_id__in=all_calendar_ids)
-    for calendar in inactive_calendars:
+
+    for calendar in calendars_not_returned_by_google:
         calendar.active = False
         calendar.save()
