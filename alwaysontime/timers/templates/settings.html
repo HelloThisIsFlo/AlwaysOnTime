@@ -7,85 +7,86 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Always On Time</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css">
-    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css"
-          integrity="sha384-DyZ88mC6Up2uqS4h/KRgHuoeGwBcD4Ng9SiP4dIRy0EXTlnuz47vAwmeGwVChigm" crossorigin="anonymous">
+    <script src="https://kit.fontawesome.com/2e085ce7bf.js" crossorigin="anonymous"></script>
     <style>
+        /* Main */
         * {
             box-sizing: border-box;
         {#outline: 1px solid #f00 !important;#}
-        }
-
-        .timer {
-            margin: 30px;
-            width: auto;
-        }
-
-        @media (min-width: 500px) {
-            .timer {
-                margin: 30px;
-                width: 290px;
-            }
-        }
-
-        .title {
-            padding-top: 40px;
-
         }
 
         html {
             background-color: #fff9ee;
         }
 
-        .container {
-            margin-bottom: 100px;
+        /* Title */
+        .title {
+            padding-top: 40px;
         }
 
-        .calendars {
-            border-radius: 4px;
-            box-shadow: 4px 4px 13px -2px dimgrey;
 
+        /* Calendars section */
+        .calendars {
+            margin: 30px;
+            width: auto;
+        }
+
+        @media (min-width: 500px) {
+            .calendars {
+                margin: 30px auto;
+                width: 350px;
+            }
+        }
+
+
+        /* Home button */
+        .button {
+            margin-top: 30px;
+            margin-left: 30px;
+            margin-bottom: 50px
+        }
+
+        .fas,
+        .far {
+            padding-right: 10px;
         }
     </style>
 </head>
 <body>
 <div class="container">
 
-    <div class="columns is-centered is-mobile">
-        <div class="column">
-            <h1 class="title has-text-centered">Settings</h1>
-        </div>
-    </div>
-    <div class="columns is-mobile">
-        <a href="{% url 'index' %}" class="button">Home</a>
-    </div>
-    <div class="columns is-centered is-mobile">
-        <div class="column is-half">
-            <table class="calendars table">
-                <thead>
-                <tr>
-                    <th>Active</th>
-                    <th>Calendar</th>
-                </tr>
-                </thead>
-                <tbody>
-                {% for c in calendars %}
-                    <tr class="calendar">
-                        <td>
-                            <input class="active-checkbox"
-                                   type="checkbox"
-                                   id="active-{{ c.id }}"
-                                   data-id="{{ c.id }}"
-                                   {% if c.active %}checked{% endif %}>
-                        </td>
-                        <td>
-                            <label for="active-{{ c.id }}">{{ c.name }}</label>
-                        </td>
+    <h1 class="title has-text-centered">Settings</h1>
+    <div class="calendars card">
+        <div class="card-content">
+            <div class="content">
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th>Active</th>
+                        <th>Calendar</th>
                     </tr>
-                {% endfor %}
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                    {% for c in calendars %}
+                        <tr class="calendar">
+                            <td>
+                                <input class="active-checkbox"
+                                       type="checkbox"
+                                       id="active-{{ c.id }}"
+                                       data-id="{{ c.id }}"
+                                       {% if c.active %}checked{% endif %}>
+                            </td>
+                            <td>
+                                <label for="active-{{ c.id }}">{{ c.name }}</label>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
+    <a href="{% url 'index' %}" class="button"><i class="fas fa-chevron-left"></i>Home</a>
 </div>
 <div class="debug"></div>
 <script>

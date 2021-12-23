@@ -7,17 +7,33 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Always On Time</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css">
-    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css"
-          integrity="sha384-DyZ88mC6Up2uqS4h/KRgHuoeGwBcD4Ng9SiP4dIRy0EXTlnuz47vAwmeGwVChigm" crossorigin="anonymous">
+    <script src="https://kit.fontawesome.com/2e085ce7bf.js" crossorigin="anonymous"></script>
     <style>
+        /* Main */
         * {
             box-sizing: border-box;
+        {#outline: 1px solid #f00 !important;#}
+        }
+
+        html {
+            background-color: #fff9ee;
+        }
+
+
+        /* Title */
+        .title {
+            padding-top: 40px;
+        }
+
+
+        /* Timers section */
+        .message {
+            border: 1px darkgrey solid;
         }
 
         .timers {
             position: relative;
             margin-top: 100px;
-            margin-bottom: 130px;
         }
 
         .timer {
@@ -32,9 +48,8 @@
             }
         }
 
-        .title {
-            padding-top: 40px;
-
+        .subtitle {
+            margin-left: 20px;
         }
 
         .due {
@@ -49,27 +64,23 @@
             margin-bottom: 130px;
         }
 
-        .subtitle {
-            margin-left: 20px;
+
+        /* Settings button */
+        .button {
+            margin-top: 30px;
+            margin-left: 30px;
+            margin-bottom: 50px;
+
         }
 
-        html {
-            background-color: #fff9ee;
+        .fas,
+        .far {
+            padding-right: 10px;
         }
 
+        /* Debug */
         .debug-menu {
             display: none;
-        }
-
-        .container {
-            margin-bottom: 100px;
-        }
-        .message {
-            border: 1px darkgrey solid;
-        }
-
-        * {
-        {#outline: 1px solid #f00 !important;#}
         }
     </style>
 </head>
@@ -132,9 +143,7 @@
         {% endif %}
     </div>
 
-    <div class="columns is-mobile">
-        <a href="{% url 'settings' %}" class="button">Settings</a>
-    </div>
+    <a href="{% url 'settings' %}" class="button"><i class="far fa-check-square"></i>Settings</a>
 </div>
 <aside class="menu debug-menu">
     <p class="menu-label">
