@@ -202,6 +202,13 @@ class TestHomePage:
             assertNotContains(response, 'No active calendars!')
             assertNotContains(response, 'Go to Settings to activate calendars')
 
+        def test_has_link_to_logout(self, client, logged_in_test_user):
+            response = client.get('/')
+            assertContains(
+                    response,
+                    f'href="{reverse("account_logout")}'
+            )
+
 
 class TestSettings:
     def test_redirects_if_user_not_logged_in(self, client):
