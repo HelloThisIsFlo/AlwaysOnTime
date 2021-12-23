@@ -1,7 +1,6 @@
 from datetime import timezone, timedelta
 
 import dateutil.parser
-import pytz
 from allauth.socialaccount.models import SocialApp
 from django.conf import settings
 from google.auth.transport.requests import Request
@@ -56,18 +55,14 @@ class GoogleCalendarApi:
 
     @staticmethod
     def _map_event_to_domain(event):
-        def parse_date(date_str, timezone_name):
-            tz = pytz.timezone(timezone_name)
-            dt = dateutil.parser.isoparse(date_str)
-            return dt.replace(tzinfo=tz)
+        def parse_date(date_str):
+            return dateutil.parser.isoparse(date_str)
 
         return {
             'id': event['id'],
             'name': event['summary'],
-            'start': parse_date(event['start']['dateTime'],
-                                event['start']['timeZone']),
-            'end': parse_date(event['end']['dateTime'],
-                              event['end']['timeZone'])
+            'start': parse_date(event['start']['dateTime']),
+            'end': parse_date(event['end']['dateTime'])
         }
 
     @staticmethod

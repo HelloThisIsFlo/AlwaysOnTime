@@ -18,3 +18,4 @@
     - [x] Add back arrow
 - [x] Main Page design
   - [x] Make 'Settings' button pretty 
+- [x] Fix timezone issue

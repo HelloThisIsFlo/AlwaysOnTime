@@ -143,10 +143,12 @@ class TestEvents:
                 'summary': 'Some Event',
                 'start': {
                     'dateTime': '2021-12-24T19:30:00Z',
-                    'timeZone': 'Europe/London'},
+                    # Timezone is returned but the 'dateTime' already contains
+                    # timezone info `Z` == `UTC`. So `timeZone` must be ignored
+                    'timeZone': 'America/Vancouver'},
                 'end': {
                     'dateTime': '2021-12-24T20:30:00Z',
-                    'timeZone': 'Europe/London'},
+                    'timeZone': 'America/Vancouver'},
             }]
         }
 
@@ -160,11 +162,11 @@ class TestEvents:
                 'name': 'Some Event',
                 'start': datetime(
                         2021, 12, 24, 19, 30,
-                        tzinfo=pytz.timezone('Europe/London')
+                        tzinfo=pytz.utc
                 ),
                 'end': datetime(
                         2021, 12, 24, 20, 30,
-                        tzinfo=pytz.timezone('Europe/London')
+                        tzinfo=pytz.utc
                 )
             }
         ]
