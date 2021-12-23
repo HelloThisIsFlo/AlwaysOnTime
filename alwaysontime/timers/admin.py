@@ -17,4 +17,4 @@ class EventAdmin(admin.ModelAdmin):
 
 @admin.register(Calendar)
 class CalendarAdmin(admin.ModelAdmin):
-    list_display = ('name', 'active')
+    list_display = ('name', 'user', 'active')
