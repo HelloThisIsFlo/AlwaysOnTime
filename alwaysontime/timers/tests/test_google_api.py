@@ -157,7 +157,7 @@ class TestEvents:
         assert events == [
             {
                 'id': 'event_id_1234',
-                'summary': 'Some Event',
+                'name': 'Some Event',
                 'start': datetime(
                         2021, 12, 24, 19, 30,
                         tzinfo=pytz.timezone('Europe/London')

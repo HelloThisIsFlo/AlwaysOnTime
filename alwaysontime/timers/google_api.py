@@ -63,7 +63,7 @@ class GoogleCalendarApi:
 
         return {
             'id': event['id'],
-            'summary': event['summary'],
+            'name': event['summary'],
             'start': parse_date(event['start']['dateTime'],
                                 event['start']['timeZone']),
             'end': parse_date(event['end']['dateTime'],

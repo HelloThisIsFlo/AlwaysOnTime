@@ -14,8 +14,7 @@ class Calendar(models.Model):
 
 class Event(models.Model):
     google_id = models.CharField(max_length=100)
-    # TODO: Rename 'summary' -> 'name'
-    summary = models.CharField(max_length=100)
+    name = models.CharField(max_length=100)
     start = models.DateTimeField()
     end = models.DateTimeField()
     calendar = models.ForeignKey(Calendar, on_delete=models.CASCADE)

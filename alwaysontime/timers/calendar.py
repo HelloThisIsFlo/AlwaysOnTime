@@ -24,7 +24,7 @@ def refresh_events(user):
                 event = Event.objects.get(google_id=e_id, calendar=cal)
             else:
                 event = Event(google_id=e_id)
-            event.summary = e['summary']
+            event.name = e['name']
             event.start = e['start']
             event.end = e['end']
             event.calendar = cal

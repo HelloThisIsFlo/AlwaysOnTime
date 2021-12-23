@@ -6,7 +6,7 @@ from timers.models import Event, Calendar
 
 @admin.register(Event)
 class EventAdmin(admin.ModelAdmin):
-    list_display = ('summary', 'user', 'calendar_name', 'start')
+    list_display = ('name', 'user', 'calendar_name', 'start')
 
     def user(self, obj):
         return obj.calendar.user

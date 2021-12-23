@@ -73,9 +73,9 @@ class TestRefreshEvents:
         end2 = datetime(2021, 10, 15, 14, 5, tzinfo=timezone.utc)
         end3 = datetime(2021, 10, 15, 15, 5, tzinfo=timezone.utc)
         api_mock.events.return_value = [
-            {'id': 'id1', 'summary': 's1', 'start': start1, 'end': end1},
-            {'id': 'id2', 'summary': 's2', 'start': start2, 'end': end2},
-            {'id': 'id3', 'summary': 's3', 'start': start3, 'end': end3},
+            {'id': 'id1', 'name': 's1', 'start': start1, 'end': end1},
+            {'id': 'id2', 'name': 's2', 'start': start2, 'end': end2},
+            {'id': 'id3', 'name': 's3', 'start': start3, 'end': end3},
         ]
 
         calendar.refresh_events(test_user)
@@ -83,7 +83,7 @@ class TestRefreshEvents:
         assert Event.objects.filter(google_id='id1').exists()
         event1 = Event.objects.get(google_id='id1')
         assert event1.google_id == 'id1'
-        assert event1.summary == 's1'
+        assert event1.name == 's1'
         assert event1.start == start1
         assert event1.end == end1
         assert event1.calendar == test_cal
@@ -91,7 +91,7 @@ class TestRefreshEvents:
         assert Event.objects.filter(google_id='id2').exists()
         event2 = Event.objects.get(google_id='id2')
         assert event2.google_id == 'id2'
-        assert event2.summary == 's2'
+        assert event2.name == 's2'
         assert event2.start == start2
         assert event2.end == end2
         assert event2.calendar == test_cal
@@ -99,7 +99,7 @@ class TestRefreshEvents:
         assert Event.objects.filter(google_id='id3').exists()
         event3 = Event.objects.get(google_id='id3')
         assert event3.google_id == 'id3'
-        assert event3.summary == 's3'
+        assert event3.name == 's3'
         assert event3.start == start3
         assert event3.end == end3
         assert event3.calendar == test_cal
@@ -110,12 +110,12 @@ class TestRefreshEvents:
     ):
         api_mock = GoogleCalendarApiMock()
         Event.objects.create(google_id='id1',
-                             summary='Should updated',
+                             name='Should updated',
                              start=datetime.now(),
                              end=datetime.now(),
                              calendar=test_calendar)
         Event.objects.create(google_id='id1',
-                             summary="Should NOT update <- Same 'google_id' "
+                             name="Should NOT update <- Same 'google_id' "
                                      "but different 'calendar'",
                              start=datetime.now(),
                              end=datetime.now(),
@@ -124,7 +124,7 @@ class TestRefreshEvents:
         start1 = datetime(year=2021, month=10, day=15, hour=10, minute=5)
         end1 = datetime(year=2021, month=10, day=15, hour=13, minute=5)
         api_mock.events.return_value = [
-            {'id': 'id1', 'summary': 'UPDATED', 'start': start1, 'end': end1},
+            {'id': 'id1', 'name': 'UPDATED', 'start': start1, 'end': end1},
         ]
 
         calendar.refresh_events(test_user)
@@ -133,11 +133,11 @@ class TestRefreshEvents:
         assert Event.objects.get(
                 google_id='id1',
                 calendar__user=test_user
-        ).summary == 'UPDATED'
+        ).name == 'UPDATED'
         assert Event.objects.get(
                 google_id='id1',
                 calendar__user=another_user
-        ).summary == "Should NOT update <- Same 'google_id' " \
+        ).name == "Should NOT update <- Same 'google_id' " \
                      "but different 'calendar'"
 
     def test_delete_all_events_not_returned_by_api(
@@ -147,12 +147,12 @@ class TestRefreshEvents:
         test_cal = create_test_calendar('cal1', active=True)
 
         Event.objects.create(google_id='id1',
-                             summary='Should be deleted',
+                             name='Should be deleted',
                              start=datetime.now(),
                              end=datetime.now(),
                              calendar=test_cal)
         Event.objects.create(google_id='id1',
-                             summary='Should NOT be deleted <- different user',
+                             name='Should NOT be deleted <- different user',
                              start=datetime.now(),
                              end=datetime.now(),
                              calendar=another_users_calendar)
@@ -160,7 +160,7 @@ class TestRefreshEvents:
         start2 = datetime(year=2021, month=10, day=15, hour=11, minute=5)
         end2 = datetime(year=2021, month=10, day=15, hour=14, minute=5)
         api_mock.events.return_value = [
-            {'id': 'id2', 'summary': 's2', 'start': start2, 'end': end2}
+            {'id': 'id2', 'name': 's2', 'start': start2, 'end': end2}
         ]
 
         calendar.refresh_events(test_user)
