@@ -3,6 +3,7 @@ from datetime import timedelta
 from unittest.mock import patch
 
 import pytest
+from django.urls import reverse
 from django.utils import timezone
 from pytest_django.asserts import assertRedirects, assertTemplateUsed, \
     assertContains
@@ -152,6 +153,98 @@ class TestHomePage:
             assert response.context['main_event'].name == \
                    "DO DISPLAY - Event from active calendar"
             assert len(response.context['other_events']) == 0
+
+    class TestLayout:
+        def test_has_link_to_settings_page(self, client, logged_in_test_user):
+            response = client.get('/')
+            assertContains(response,
+                           f'<a href="{reverse("settings")}">Settings</a>')
+
+
+class TestSettings:
+    def test_redirects_if_user_not_logged_in(self, client):
+        response = client.get('/settings/')
+        assertRedirects(response, '/accounts/login/?next=/settings/')
+
+    def test_redirects_if_user_does_not_have_google_linked(
+            self, test_user_without_google_credentials, client
+    ):
+        client.login(username=conftest.TEST_USERNAME,
+                     password=conftest.TEST_PASSWORD)
+        response = client.get('/settings/')
+        assertRedirects(response, '/accounts/social/connections/')
+
+    def test_use_correct_template(
+            self, logged_in_test_user, client
+    ):
+        response = client.get('/settings/')
+        assertTemplateUsed(response, 'settings.html')
+
+    def test_return_all_users_calendars_with_status(
+            self, logged_in_test_user, client
+    ):
+        Calendar.objects.create(id=1,
+                                google_id='google_id_1',
+                                name='cal1',
+                                active=False,
+                                user=logged_in_test_user)
+        Calendar.objects.create(id=2,
+                                google_id='google_id_2',
+                                name='cal2',
+                                active=True,
+                                user=logged_in_test_user)
+        Calendar.objects.create(id=3,
+                                google_id='google_id_3',
+                                name='cal3',
+                                active=False,
+                                user=logged_in_test_user)
+        response = client.get('/settings/')
+        assert 'calendars' in response.context
+        assert response.context['calendars'] == [
+            {'id': 1, 'name': 'cal1', 'active': False},
+            {'id': 2, 'name': 'cal2', 'active': True},
+            {'id': 3, 'name': 'cal3', 'active': False},
+        ]
+
+    def test_return_empty_list_of_calendars_if_no_calendars(
+            self, logged_in_test_user, client
+    ):
+        Calendar.objects.all().delete()
+        response = client.get('/settings/')
+        assert 'calendars' in response.context
+        assert response.context['calendars'] == []
+
+    def test_only_return_calendars_of_logged_in_user(
+            self, logged_in_test_user, another_user, client
+    ):
+        Calendar.objects.create(id=1,
+                                google_id='google_id_1',
+                                name='cal1',
+                                active=False,
+                                user=logged_in_test_user)
+        Calendar.objects.create(id=2,
+                                google_id='google_id_2',
+                                name='cal2',
+                                active=True,
+                                user=logged_in_test_user)
+        Calendar.objects.create(id=3,
+                                google_id='google_id_3',
+                                name='should not be displayed <- another user',
+                                active=False,
+                                user=another_user)
+
+        response = client.get('/settings/')
+
+        assert 'calendars' in response.context
+        assert response.context['calendars'] == [
+            {'id': 1, 'name': 'cal1', 'active': False},
+            {'id': 2, 'name': 'cal2', 'active': True}
+        ]
+
+    def test_has_link_to_home_page(self, client, logged_in_test_user):
+        response = client.get('/settings/')
+        assertContains(response,
+                       f'<a href="{reverse("index")}">Home</a>')
 
 
 class TestRefreshEvents:

@@ -17,7 +17,7 @@ from ratelimit.decorators import ratelimit
 
 from alwaysontime.settings import GOOGLE_SCOPES
 from timers.calendar import refresh_events, refresh_calendars
-from timers.models import Event
+from timers.models import Event, Calendar
 
 
 def with_authenticated_calendar_service(endpoint_func):
@@ -47,11 +47,22 @@ def with_authenticated_calendar_service(endpoint_func):
     return wrapper
 
 
-@login_required
-def index(request):
-    if not SocialToken.objects.filter(account__user=request.user):
-        return redirect('/accounts/social/connections/')
+def google_account_required(view_func):
+    @wraps(view_func)
+    def wrapper(request):
+        if not request.user.is_authenticated:
+            raise RuntimeError("Only use this decorator in combination "
+                               "with '@login_required'")
+        if not SocialToken.objects.filter(account__user=request.user):
+            return redirect('/accounts/social/connections/')
+        return view_func(request)
 
+    return wrapper
+
+
+@login_required
+@google_account_required
+def index(request):
     now = timezone.now()
     now_minus_delta = \
         now - datetime.timedelta(minutes=settings.TIMERS_SHOW_X_MIN_PAST)
@@ -67,6 +78,19 @@ def index(request):
     return render(request, 'index.html', {
         'main_event': events[0] if events else None,
         'other_events': events[1:]
+    })
+
+
+@login_required
+@google_account_required
+def settings_page(request):
+    calendars = Calendar.objects.filter(user=request.user)
+    return render(request, 'settings.html', {
+        'calendars': [{
+            'id': c.id,
+            'name': c.name,
+            'active': c.active
+        } for c in calendars]
     })
 
 
