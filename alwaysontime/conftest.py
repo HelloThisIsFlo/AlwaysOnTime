@@ -51,7 +51,7 @@ def logged_in_test_user(test_user, client):
 
 
 @pytest.fixture
-def test_calendar(test_user):
+def test_user_calendar(test_user):
     return Calendar.objects.create(
             google_id=TEST_CALENDAR_ID,
             active=True,

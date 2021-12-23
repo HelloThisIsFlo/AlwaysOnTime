@@ -105,7 +105,7 @@ class TestRefreshEvents:
         assert event3.calendar == test_cal
 
     def test_update_existing_events(
-            self, GoogleCalendarApiMock, test_user, test_calendar,
+            self, GoogleCalendarApiMock, test_user, test_user_calendar,
             another_user, another_users_calendar
     ):
         api_mock = GoogleCalendarApiMock()
@@ -113,7 +113,7 @@ class TestRefreshEvents:
                              name='Should updated',
                              start=datetime.now(),
                              end=datetime.now(),
-                             calendar=test_calendar)
+                             calendar=test_user_calendar)
         Event.objects.create(google_id='id1',
                              name="Should NOT update <- Same 'google_id' "
                                      "but different 'calendar'",

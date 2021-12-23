@@ -39,22 +39,22 @@ class TestHomePage:
             assertTemplateUsed(response, 'index.html')
 
         def test_return_next_event_in_time_as_main_event_and_rest_as_other_events(
-                self, client, logged_in_test_user, test_calendar
+                self, client, logged_in_test_user, test_user_calendar
         ):
             not_used = timezone.now() + timedelta(hours=10)
             Event(google_id='1',
                   name='Starts in 4 hours',
-                  calendar=test_calendar,
+                  calendar=test_user_calendar,
                   start=timezone.now() + timedelta(hours=4),
                   end=not_used).save()
             Event(google_id='2',
                   name='Starts in 1 minutes: This is the next one in time',
-                  calendar=test_calendar,
+                  calendar=test_user_calendar,
                   start=timezone.now() + timedelta(minutes=1),
                   end=not_used).save()
             Event(google_id='3',
                   name='Starts in 2 hours',
-                  calendar=test_calendar,
+                  calendar=test_user_calendar,
                   start=timezone.now() + timedelta(hours=2),
                   end=not_used).save()
 
@@ -71,12 +71,12 @@ class TestHomePage:
             assert other_events[1].name == 'Starts in 4 hours'
 
         def test_return_only_main_event_if_no_other_events(
-                self, client, logged_in_test_user, test_calendar
+                self, client, logged_in_test_user, test_user_calendar
         ):
             not_used = timezone.now() + timedelta(hours=10)
             Event(google_id='1',
                   name='Starts in 1 minutes: This is the next one in time',
-                  calendar=test_calendar,
+                  calendar=test_user_calendar,
                   start=timezone.now() + timedelta(minutes=1),
                   end=not_used).save()
 
@@ -100,7 +100,7 @@ class TestHomePage:
             assert len(response.context['other_events']) == 0
 
         def test_return_only_events_for_the_currently_logged_in_user(
-                self, client, logged_in_test_user, test_calendar,
+                self, client, logged_in_test_user, test_user_calendar,
                 another_user, another_users_calendar
         ):
             not_used = timezone.now() + timedelta(hours=10)
@@ -113,7 +113,7 @@ class TestHomePage:
             # Logged in user's event
             Event(google_id='2',
                   name="DO DISPLAY - Logged in user's event",
-                  calendar=test_calendar,
+                  calendar=test_user_calendar,
                   start=timezone.now() + timedelta(minutes=1),
                   end=not_used).save()
 
@@ -124,7 +124,7 @@ class TestHomePage:
             assert len(response.context['other_events']) == 0
 
         def test_return_only_events_for_active_calendars(
-                self, client, logged_in_test_user, test_calendar
+                self, client, logged_in_test_user, test_user_calendar
         ):
             inactive_calendar = Calendar.objects.create(
                     google_id='id_another_user_calendar',
@@ -143,7 +143,7 @@ class TestHomePage:
             # Logged in user's event
             Event(google_id='2',
                   name="DO DISPLAY - Event from active calendar",
-                  calendar=test_calendar,
+                  calendar=test_user_calendar,
                   start=timezone.now() + timedelta(minutes=1),
                   end=not_used).save()
 
