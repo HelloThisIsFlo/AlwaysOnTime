@@ -70,7 +70,7 @@ def another_user():
 
 
 @pytest.fixture
-def another_users_calendar(another_user):
+def another_user_calendar(another_user):
     return Calendar.objects.create(
             google_id='id_another_user_calendar',
             name='another_user_calendar',

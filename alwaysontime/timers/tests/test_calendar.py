@@ -106,7 +106,7 @@ class TestRefreshEvents:
 
     def test_update_existing_events(
             self, GoogleCalendarApiMock, test_user, test_user_calendar,
-            another_user, another_users_calendar
+            another_user, another_user_calendar
     ):
         api_mock = GoogleCalendarApiMock()
         Event.objects.create(google_id='id1',
@@ -119,7 +119,7 @@ class TestRefreshEvents:
                                      "but different 'calendar'",
                              start=datetime.now(),
                              end=datetime.now(),
-                             calendar=another_users_calendar)
+                             calendar=another_user_calendar)
 
         start1 = datetime(year=2021, month=10, day=15, hour=10, minute=5)
         end1 = datetime(year=2021, month=10, day=15, hour=13, minute=5)
@@ -141,7 +141,7 @@ class TestRefreshEvents:
                      "but different 'calendar'"
 
     def test_delete_all_events_not_returned_by_api(
-            self, GoogleCalendarApiMock, test_user, another_users_calendar
+            self, GoogleCalendarApiMock, test_user, another_user_calendar
     ):
         api_mock = GoogleCalendarApiMock()
         test_cal = create_test_calendar('cal1', active=True)
@@ -155,7 +155,7 @@ class TestRefreshEvents:
                              name='Should NOT be deleted <- different user',
                              start=datetime.now(),
                              end=datetime.now(),
-                             calendar=another_users_calendar)
+                             calendar=another_user_calendar)
 
         start2 = datetime(year=2021, month=10, day=15, hour=11, minute=5)
         end2 = datetime(year=2021, month=10, day=15, hour=14, minute=5)
@@ -171,7 +171,7 @@ class TestRefreshEvents:
         ).exists()
         assert Event.objects.filter(
                 google_id='id1',
-                calendar=another_users_calendar
+                calendar=another_user_calendar
         ).exists()
         assert Event.objects.filter(
                 google_id='id2',

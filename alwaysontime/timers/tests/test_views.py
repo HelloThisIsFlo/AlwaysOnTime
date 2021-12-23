@@ -101,12 +101,12 @@ class TestHomePage:
 
         def test_return_only_events_for_the_currently_logged_in_user(
                 self, client, logged_in_test_user, test_user_calendar,
-                another_user, another_users_calendar
+                another_user, another_user_calendar
         ):
             not_used = timezone.now() + timedelta(hours=10)
             Event(google_id='1',
                   name="DONT DISPLAY - Another user's event",
-                  calendar=another_users_calendar,
+                  calendar=another_user_calendar,
                   start=timezone.now() + timedelta(hours=2),
                   end=not_used).save()
 
