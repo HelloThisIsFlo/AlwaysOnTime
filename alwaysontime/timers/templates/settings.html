@@ -49,12 +49,14 @@
 </head>
 <body>
 <div class="container">
-    <a href="{% url 'index' %}">Home</a>
 
     <div class="columns is-centered is-mobile">
         <div class="column">
             <h1 class="title has-text-centered">Settings</h1>
         </div>
+    </div>
+    <div class="columns is-mobile">
+        <a href="{% url 'index' %}" class="button">Home</a>
     </div>
     <div class="columns is-centered is-mobile">
         <div class="column is-half">
@@ -67,9 +69,17 @@
                 </thead>
                 <tbody>
                 {% for c in calendars %}
-                    <tr class="calendar" data-id="{{ c.id }}">
-                        <td><input type="checkbox" id="active-{{ c.id }}" {% if c.active %}checked{% endif %}></td>
-                        <td><label for="active-{{ c.id }}">{{ c.name }}</label></td>
+                    <tr class="calendar">
+                        <td>
+                            <input class="active-checkbox"
+                                   type="checkbox"
+                                   id="active-{{ c.id }}"
+                                   data-id="{{ c.id }}"
+                                   {% if c.active %}checked{% endif %}>
+                        </td>
+                        <td>
+                            <label for="active-{{ c.id }}">{{ c.name }}</label>
+                        </td>
                     </tr>
                 {% endfor %}
                 </tbody>
@@ -81,14 +91,51 @@
 <script>
     const DEBUG_MODE = false;
 
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                // Does this cookie string begin with the name we want?
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
     fetch('/calendars/refresh')
         .then(resp => resp.text())
         .then(resp => console.log(`Refreshed calendars | Resp: ${resp}`))
 
+    const calendarCheckboxes = document.querySelectorAll('.active-checkbox')
+    for (const checkbox of calendarCheckboxes) {
+        checkbox.addEventListener('change', function () {
+            const calId = this.dataset.id
+            const active = this.checked
+
+            fetch(`/calendars/${calId}/`, {
+                method: "POST",
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({active})
+            })
+                .then(resp => resp.text())
+                .then(resp => console.log(`Updated calendar '${calId}' | Resp: ${resp}`))
+        })
+
+    }
+
     /*
     * DEBUG - Reload every X sec
     */
-    const debugDiv = document.querySelector('.debug')
+    const
+        debugDiv = document.querySelector('.debug')
     let countDown = 2;
     const reloadPagePeriodically = () => {
         if (!countDown) {

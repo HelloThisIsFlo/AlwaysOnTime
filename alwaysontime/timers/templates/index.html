@@ -16,6 +16,8 @@
 
         .timers {
             position: relative;
+            margin-top: 100px;
+            margin-bottom: 130px;
         }
 
         .timer {
@@ -28,11 +30,6 @@
                 margin: 30px;
                 width: 290px;
             }
-        }
-
-
-        .timers {
-            margin-top: 100px;
         }
 
         .title {
@@ -120,9 +117,11 @@
             {% endfor %}
         {% endif %}
     </div>
+
+    <div class="columns is-mobile">
+        <a href="{% url 'settings' %}" class="button">Settings</a>
+    </div>
 </div>
-<hr>
-<h4><a href="{% url 'settings' %}">Settings</a></h4>
 <aside class="menu debug-menu">
     <p class="menu-label">
         Debug
@@ -195,7 +194,7 @@
         setTimeout(reloadPagePeriodically, 1000)
     }
     if (DEBUG_MODE) {
-        // reloadPagePeriodically()
+        reloadPagePeriodically()
 
         debugMenuDiv = document.querySelector('.debug-menu')
         debugMenuDiv.style.display = 'block';
