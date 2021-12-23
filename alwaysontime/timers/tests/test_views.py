@@ -7,7 +7,7 @@ import pytest
 from django.urls import reverse
 from django.utils import timezone
 from pytest_django.asserts import assertRedirects, assertTemplateUsed, \
-    assertContains
+    assertContains, assertNotContains
 
 import conftest
 import timers.views
@@ -155,11 +155,52 @@ class TestHomePage:
                    "DO DISPLAY - Event from active calendar"
             assert len(response.context['other_events']) == 0
 
+        def test_return_active_calendars_of_logged_in_user(
+                self, client, logged_in_test_user, test_user_calendar,
+                another_user, another_user_calendar
+        ):
+            inactive_calendar = Calendar(
+                    google_id='id_another_user_calendar',
+                    name='another_user_calendar',
+                    user=logged_in_test_user,
+                    active=False
+            )
+            inactive_calendar.save()
+            test_user_calendar.active = True
+            test_user_calendar.save()
+            another_user_calendar.active = True
+            another_user_calendar.save()
+
+            response = client.get('/')
+
+            assert 'active_calendars' in response.context
+            assert response.context['active_calendars'] == [
+                test_user_calendar.name
+            ]
+
     class TestLayout:
         def test_has_link_to_settings_page(self, client, logged_in_test_user):
             response = client.get('/')
-            assertContains(response,
-                           f'<a href="{reverse("settings")}">Settings</a>')
+            assertContains(response, f'href="{reverse("settings")}')
+
+        def test_show_warning_if_no_active_calendars(
+                self, client, logged_in_test_user, test_user_calendar
+        ):
+            test_user_calendar.active = False
+            test_user_calendar.save()
+            response = client.get('/')
+            assertContains(response, 'No active calendars!')
+            assertContains(response, 'Go to Settings to activate calendars')
+            assertNotContains(response, 'Main Event')
+
+        def test_do_not_show_warning_if_active_calendars(
+                self, client, logged_in_test_user, test_user_calendar
+        ):
+            test_user_calendar.active = True
+            test_user_calendar.save()
+            response = client.get('/')
+            assertNotContains(response, 'No active calendars!')
+            assertNotContains(response, 'Go to Settings to activate calendars')
 
 
 class TestSettings:
@@ -244,8 +285,7 @@ class TestSettings:
 
     def test_has_link_to_home_page(self, client, logged_in_test_user):
         response = client.get('/settings/')
-        assertContains(response,
-                       f'<a href="{reverse("index")}">Home</a>')
+        assertContains(response, f'href="{reverse("index")}"')
 
 
 class TestRefreshEvents:

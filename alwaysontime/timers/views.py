@@ -69,16 +69,18 @@ def index(request):
         now - datetime.timedelta(minutes=settings.TIMERS_SHOW_X_MIN_PAST)
     now_plus_delta = \
         now + datetime.timedelta(minutes=settings.TIMERS_SHOW_X_MIN_FUTURE)
+
+    active_calendars = Calendar.objects.filter(active=True, user=request.user)
     events = list(Event.objects.filter(
-            calendar__active=True,
-            calendar__user=request.user,
+            calendar__in=active_calendars,
             start__gte=now_minus_delta,
             start__lt=now_plus_delta
     ).order_by('start'))
 
     return render(request, 'index.html', {
         'main_event': events[0] if events else None,
-        'other_events': events[1:]
+        'other_events': events[1:],
+        'active_calendars': [c.name for c in active_calendars]
     })
 
 

@@ -64,6 +64,9 @@
         .container {
             margin-bottom: 100px;
         }
+        .message {
+            border: 1px darkgrey solid;
+        }
 
         * {
         {#outline: 1px solid #f00 !important;#}
@@ -74,47 +77,58 @@
 <div class="container">
     <h1 class="title has-text-centered">Always On Time</h1>
     <div class="timers">
-        {% if main_event %}
-            <h2 class="subtitle is-3">Main Event</h2>
-            <div class="card timer main-event">
-                <div class="card-content">
-                    <div class="media">
-                        <div class="media-content">
-                            <div class="name">{{ main_event.name }}</div>
-                        </div>
-                    </div>
-                    <div class="content">
-                        <p class="time is-size-2" data-start="{{ main_event.start|date:"r" }}"></p>
-                    </div>
-                </div>
-            </div>
-        {% else %}
-            <h2 class="subtitle is-3">Main Event</h2>
-            <div class="card timer main-event">
-                <div class="card-content">
-                    <div class="content">
-                        <p class="is-size-2">No Events</p>
-                    </div>
-                </div>
-            </div>
-        {% endif %}
-
-        {% if other_events %}
-            <h2 class="subtitle is-3">Later Events</h2>
-            {% for e in other_events %}
-                <div class="card timer">
+        {% if active_calendars %}
+            {% if main_event %}
+                <h2 class="subtitle is-3">Main Event</h2>
+                <div class="card timer main-event">
                     <div class="card-content">
                         <div class="media">
                             <div class="media-content">
-                                <div class="name">{{ e.name }}</div>
+                                <div class="name">{{ main_event.name }}</div>
                             </div>
                         </div>
                         <div class="content">
-                            <p class="time is-size-2" data-start="{{ e.start|date:"r" }}"></p>
+                            <p class="time is-size-2" data-start="{{ main_event.start|date:"r" }}"></p>
                         </div>
                     </div>
                 </div>
-            {% endfor %}
+            {% else %}
+                <h2 class="subtitle is-3">Main Event</h2>
+                <div class="card timer main-event">
+                    <div class="card-content">
+                        <div class="content">
+                            <p class="is-size-2">No Events</p>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+
+            {% if other_events %}
+                <h2 class="subtitle is-3">Later Events</h2>
+                {% for e in other_events %}
+                    <div class="card timer">
+                        <div class="card-content">
+                            <div class="media">
+                                <div class="media-content">
+                                    <div class="name">{{ e.name }}</div>
+                                </div>
+                            </div>
+                            <div class="content">
+                                <p class="time is-size-2" data-start="{{ e.start|date:"r" }}"></p>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% else %}
+            <article class="message is-warning">
+                <div class="message-header">
+                    <p>No active calendars!</p>
+                </div>
+                <div class="message-body">
+                    Go to Settings to activate calendars
+                </div>
+            </article>
         {% endif %}
     </div>
 
