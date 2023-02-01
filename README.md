@@ -1,3 +1,5 @@
 # Always On Time
+**Python - Django - TDD - Oauth**
 
-Sets timers automatically for each google calendar event
+✨ Beautiful Automatic Timers 🔔 - Showing the time until your next event 📅
+
