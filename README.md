@@ -1,5 +1,5 @@
 # Always On Time
-> ### Python - Django - TDD - Oauth - Continuous Delivery
+> ### Python - Django - TDD - Oauth - Continuous Deployment
 <br>
 
 ### ✨ Beautiful Automatic Timers 🔔  
