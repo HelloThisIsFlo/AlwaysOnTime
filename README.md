@@ -1,16 +1,19 @@
 # Always On Time
-**Python - Django - TDD - Oauth**
+> ### Python - Django - TDD - Oauth
+<br>
 
-✨ Beautiful Automatic Timers 🔔 - Showing the time until your next event 📅
-
+### ✨ Beautiful Automatic Timers 🔔  
+#### Showing the time until your next event 📅, with live-updates 🔴
+<br>
+<br>
 
 
 Main Screen              |  Settings Screen
 :-------------------------:|:-------------------------:
 ![Main Screen](https://github.com/FlorianKempenich/AlwaysOnTime/raw/main/doc/main_screen.png)  |  ![Settings Screen](https://github.com/FlorianKempenich/AlwaysOnTime/raw/main/doc/settings_screen.png)
 
-
----
+<br>
+<br>
 
 # Setup
 
